@@ -1,80 +1,33 @@
-import cv2
-import numpy as np
-import cPickle
 import time
-from sklearn.preprocessing import StandardScaler
-from sklearn import svm
+import inputOutputUtils
+import Evaluation
+from descriptors import SIFTDescriptor #add the rest when created
+from SVMClassifiers import SVMClassifier
 
 start = time.time()
 
-# read the train and test files
+# Read the train and test files
+train_images_filenames,test_images_filenames,train_labels,test_labels=inputOutputUtils.readData()
 
-train_images_filenames = cPickle.load(open('train_images_filenames.dat','r'))
-test_images_filenames = cPickle.load(open('test_images_filenames.dat','r'))
-train_labels = cPickle.load(open('train_labels.dat','r'))
-test_labels = cPickle.load(open('test_labels.dat','r'))
+# Create Descriptors (SIFT, SURF, etc)
+mySIFTDescriptor=SIFTDescriptor();#SIFT Descriptor
 
-print 'Loaded '+str(len(train_images_filenames))+' training images filenames with classes ',set(train_labels)
-print 'Loaded '+str(len(test_images_filenames))+' testing images filenames with classes ',set(test_labels)
-
-# create the SIFT detector object
-
-SIFTdetector = cv2.SIFT(nfeatures=100)
-
-# read the just 30 train images per class
-# extract SIFT keypoints and descriptors
-# store descriptors in a python list of numpy arrays
-
-Train_descriptors = []
-Train_label_per_descriptor = []
-
-for i in range(len(train_images_filenames)):
-	filename=train_images_filenames[i]
-	if Train_label_per_descriptor.count(train_labels[i])<30:
-		print 'Reading image '+filename
-		ima=cv2.imread(filename)
-		gray=cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
-		kpt,des=SIFTdetector.detectAndCompute(gray,None)
-		Train_descriptors.append(des)
-		Train_label_per_descriptor.append(train_labels[i])
-		print str(len(kpt))+' extracted keypoints and descriptors'
-
-# Transform everything to numpy arrays
-
-D=Train_descriptors[0]
-L=np.array([Train_label_per_descriptor[0]]*Train_descriptors[0].shape[0])
-
-for i in range(1,len(Train_descriptors)):
-	D=np.vstack((D,Train_descriptors[i]))
-	L=np.hstack((L,np.array([Train_label_per_descriptor[i]]*Train_descriptors[i].shape[0])))
-
+# Obtain descriptors and labels for the training set
+max_class_train_images=30
+D,L=mySIFTDescriptor.extractFeatures(train_images_filenames,train_labels,max_class_train_images)
 
 # Train a linear SVM classifier
+mySVMClassifier=SVMClassifier(C=1,kernel_type='linear')#SVMClassifier with C=1 and linear Kernel
+#TODO: Try other parameters for SVM
+clf,stdSlr=mySVMClassifier.train(D,L)
 
-stdSlr = StandardScaler().fit(D)
-D_scaled = stdSlr.transform(D)
-print 'Training the SVM classifier...'
-clf = svm.SVC(kernel='linear', C=1).fit(D_scaled, L)
-print 'Done!'
 
-# get all the test data and predict their labels
+# Get all the test data and predict their labels
+predictedClasses=mySVMClassifier.predict(test_images_filenames,test_labels,mySIFTDescriptor,clf,stdSlr)
 
-numtestimages=0
-numcorrect=0
-for i in range(len(test_images_filenames)):
-	filename=test_images_filenames[i]
-	ima=cv2.imread(filename)
-	gray=cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
-	kpt,des=SIFTdetector.detectAndCompute(gray,None)
-	predictions = clf.predict(stdSlr.transform(des))
-	values, counts = np.unique(predictions, return_counts=True)
-	predictedclass = values[np.argmax(counts)]
-	print 'image '+filename+' was from class '+test_labels[i]+' and was predicted '+predictedclass
-	numtestimages+=1
-	if predictedclass==test_labels[i]:
-		numcorrect+=1
+# Performance evaluation
+accuracy=Evaluation.computeAccuracy(predictedClasses,test_labels)
 
-print 'Final accuracy: ' + str(numcorrect*100.0/numtestimages)
 
 end=time.time()
 print 'Done in '+str(end-start)+' secs.'
