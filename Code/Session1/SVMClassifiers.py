@@ -20,7 +20,7 @@ class SVMClassifier(object):
         return clf,stdSlr
         
     #Predict test set labels with the trained classifier
-    def predict(self,test_images_filenames,test_labels,Descriptor,clf,stdSlr):
+    def predict(self,test_images_filenames,test_labels,Descriptor,clf,stdSlr, pca):
         predictedClasses=np.empty(len(test_images_filenames),dtype='|S15')
         for i in range(len(test_images_filenames)):
             filename=test_images_filenames[i]
@@ -28,7 +28,11 @@ class SVMClassifier(object):
             gray=cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
             kpt,des=Descriptor.extractKeyPointsAndDescriptors(gray)
             
-            predictions = clf.predict(stdSlr.transform(des))
+            #Reduce the dimensionality of the data (PCA)
+            new_des = pca.transform(des)
+            
+            #Predict the label for each descriptor
+            predictions = clf.predict(stdSlr.transform(new_des))
             values, counts = np.unique(predictions, return_counts=True)
             predictedClasses[i] = values[np.argmax(counts)]
             print 'image '+filename+' was from class '+test_labels[i]+' and was predicted '+predictedClasses[i]
