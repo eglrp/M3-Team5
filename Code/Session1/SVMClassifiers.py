@@ -5,16 +5,19 @@ from sklearn import svm
 
 class SVMClassifier(object):
     #Parameters of the SVM
-    def __init__(self,C,kernel_type):
+    def __init__(self,C,kernel_type, degree_value,gamma_value,weight):
         self.Cparam=C
         self.kernel=kernel_type
-
+        self.degree=degree_value
+        self.gamma=gamma_value
+        self.weight=weight
+        
     # Train a linear SVM classifier
     def train(self,D,L):
         stdSlr = StandardScaler().fit(D)
         D_scaled = stdSlr.transform(D)
         print 'Training the SVM classifier...'
-        clf = svm.SVC(kernel=self.kernel, C=self.Cparam).fit(D_scaled, L)
+        clf = svm.SVC(kernel=self.kernel, C=self.Cparam, degree=self.degree, gamma = self.gamma,class_weight = self.weight).fit(D_scaled, L)
         print 'Done!'
         
         return clf,stdSlr
