@@ -45,7 +45,7 @@ class SIFTDescriptor(AbstractDescriptor):
 
     def __init__(self):
         # create the SIFT detector object
-        self.detector=cv2.SIFT(nfeatures=100)
+        self.detector=cv2.SIFT(nfeatures = 100)
         
     def extractKeyPointsAndDescriptors(self,grayimage):
         
