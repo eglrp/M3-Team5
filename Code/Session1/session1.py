@@ -29,10 +29,12 @@ D,L=mySIFTDescriptor.extractFeatures(train_images_filenames,train_labels,max_cla
 #Apply PCA to descriptors
 print 'Applying PCA'
 number_components = 90
+
+
 D, pca = PCA_computing.PCA_to_data(D, number_components)
 
 # Train a linear SVM classifier
-mySVMClassifier=SVMClassifier(C=1,kernel_type='linear')#SVMClassifier with C=1 and linear Kernel
+mySVMClassifier=SVMClassifier(C=10,kernel_type='rbf',degree_value = 1, gamma_value = 0.01,weight = 'balanced')#SVMClassifier with C=1 and linear Kernel
 
 
 #TODO: Try other parameters for SVM
