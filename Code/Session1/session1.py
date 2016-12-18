@@ -21,9 +21,11 @@ mySIFTDescriptor=SIFTDescriptor();# SIFT Descriptor
 
 # Obtain descriptors and labels for the training set
 max_class_train_images=30
+max_class_train_images = 70
 
 D,L=mySIFTDescriptor.extractFeatures(train_images_filenames,train_labels,max_class_train_images)
 #D,L=mySURFDescriptor.extractFeatures(train_images_filenames,train_labels,max_class_train_images)
+<<<<<<< HEAD
 #D,L=myORBDescriptor.extractFeatures(train_images_filenames,train_labels,max_class_train_images)
 
 #Apply PCA to descriptors
@@ -35,6 +37,19 @@ D, pca = PCA_computing.PCA_to_data(D, number_components)
 #mySVMClassifier=SVMClassifier(C=1,kernel_type='linear')#SVMClassifier with C=1 and linear Kernel
 #mySVMClassifier=SVMClassifier(C=1,kernel_type='rbf')
 mySVMClassifier=SVMClassifier(C=1,kernel_type='poly')
+=======
+# D,L=myORBDescriptor.extractFeatures(train_images_filenames,train_labels,max_class_train_images)
+
+#Apply PCA to descriptors
+print 'Applying PCA'
+number_components = 90
+
+
+D, pca = PCA_computing.PCA_to_data(D, number_components)
+
+# Train a linear SVM classifier
+mySVMClassifier=SVMClassifier(C=10,kernel_type='rbf',degree_value = 1, gamma_value = 0.01,weight = 'balanced')#SVMClassifier with C=1 and linear Kernel
+>>>>>>> 86f1015147d095f1f98d1896bb12dcb97b200e3b
 
 
 #TODO: Try other parameters for SVM
@@ -52,6 +67,7 @@ predictedClasses=mySVMClassifier.predict(test_images_filenames,test_labels,mySIF
 
 # Performance evaluation
 accuracy=Evaluation.computeAccuracy(predictedClasses,test_labels)
+accuracy = Evaluation.computeAccuracy(predictedClasses,test_labels)
 
 
 end=time.time()
