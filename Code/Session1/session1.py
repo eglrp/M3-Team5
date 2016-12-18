@@ -2,10 +2,7 @@
 import sys
 sys.path.append('.')
 import time
-import inputOutputUtils
-import Evaluation
-import PCA_computing
-import descriptors, SVMClassifiers
+import descriptors, SVMClassifiers, Evaluation, inputOutputUtils, PCA_computing
 
 def launchsession1():
     start = time.time()
@@ -21,7 +18,7 @@ def launchsession1():
     FLSubset=inputOutputUtils.getFilenamesLabelsSubset(train_images_filenames,train_labels,max_class_train_images)
     
     # Obtain descriptors and labels for the training set
-    D,L=descriptors.extractFeatures(FLSubset,descriptor_type)#it can be ORB or SURF
+    D,L=descriptors.extractFeatures(FLSubset,descriptor_type)
     
     #Apply PCA to descriptors
     print 'Applying PCA'
@@ -50,4 +47,3 @@ def launchsession1():
 
 if __name__ == '__main__':
     launchsession1()
-

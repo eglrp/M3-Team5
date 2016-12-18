@@ -26,7 +26,7 @@ def extractFeatures(FLSubset,descriptor_type):
     data=descriptor_type
     
     pool = Pool(processes=4,initializer=initPool, initargs=[data])
-    deslab= pool.map(getKptsAndLabelsForImage, FLSubset)
+    deslab= pool.map(getDescriptorsAndLabelsForImage, FLSubset)
     pool.terminate()
 
     Train_label_per_descriptor=[x[1] for x in deslab]
@@ -42,7 +42,7 @@ def extractFeatures(FLSubset,descriptor_type):
     
     return D,L
     
-def getKptsAndLabelsForImage((filename,label)):
+def getDescriptorsAndLabelsForImage((filename,label)):
     print 'Reading image '+filename+' with label '+label
     descriptor_type=data
     detector=getattr(sys.modules[__name__],'get'+descriptor_type+'Detector')()
