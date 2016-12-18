@@ -53,16 +53,12 @@ class SIFTDescriptor(AbstractDescriptor):
         
         return kpt,des
         
-
-#TODO: Add the rest of Descriptors as classes like the one above
-        
 class SURFDescriptor(AbstractDescriptor):
     def __init__(self):
         ## create the SURF detector object
-        self.detector=cv2.SURF(hessianThreshold=400)
+        self.detector=cv2.SURF(hessianThreshold=100)
           
     def extractKeyPointsAndDescriptors(self,grayimage):
-        #TODO:
         kpt, des = self.detector.detectAndCompute(grayimage,None)
         
         return kpt,des
@@ -70,7 +66,7 @@ class SURFDescriptor(AbstractDescriptor):
 class ORBDescriptor(AbstractDescriptor):
     def __init__(self):
         # create the ORB detector object
-        self.detector = cv2.ORB_create(nfeatures=100)
+        self.detector = cv2.ORB(nfeatures=100)
             
     def extractKeyPointsAndDescriptors(self,grayimage):
         kpt, des = self.detector.detectAndCompute(grayimage,None)
