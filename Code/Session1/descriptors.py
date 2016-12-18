@@ -1,78 +1,63 @@
 import cv2
 import numpy as np
-from abc import ABCMeta, abstractmethod
+import sys
+from multiprocessing import Pool
 
-class AbstractDescriptor(object):
-    __metaclass__ = ABCMeta
+#Descriptors
+def getSIFTDetector():
+    detector=cv2.SIFT(nfeatures=100)
+    return detector
     
-    def __init__(self):
-        self.detector=None
+def getSURFDetector():
+    detector=cv2.SURF(hessianThreshold=100)
+    return detector
 
-    @abstractmethod
-    def extractKeyPointsAndDescriptors(self,grayimage):
-        pass
+def getORBDetector():
+    detector=cv2.ORB(nfeatures=100)
+    return detector
     
-    #Common to all Descriptor types
-    def extractFeatures(self,train_images_filenames,train_labels,max_class_train_images):
-        Train_descriptors = []
-        Train_label_per_descriptor = []
-        
-        for i in range(len(train_images_filenames)):
-            filename=train_images_filenames[i]
-            if Train_label_per_descriptor.count(train_labels[i])<max_class_train_images:
-                print 'Reading image '+filename
-                ima=cv2.imread(filename)
-                gray=cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
-                
-                kpt,des=self.extractKeyPointsAndDescriptors(gray)
-                
-                Train_descriptors.append(des)
-                Train_label_per_descriptor.append(train_labels[i])
-                print str(len(kpt))+' extracted keypoints and descriptors'
-        
-        # Transform everything to numpy arrays
-        D=Train_descriptors[0]
-        L=np.array([Train_label_per_descriptor[0]]*Train_descriptors[0].shape[0])
-        
-        for i in range(1,len(Train_descriptors)):
-            D=np.vstack((D,Train_descriptors[i]))
-            L=np.hstack((L,np.array([Train_label_per_descriptor[i]]*Train_descriptors[i].shape[0])))
-        
-        return D,L
+def getKeyPointsDescriptors(detector,image):
+    kpt,des=detector.detectAndCompute(image,None)
+    return kpt,des
 
 
-class SIFTDescriptor(AbstractDescriptor):
+#Extract features methods
+def extractFeatures(FLSubset,descriptor_type):
+    data=descriptor_type
+    
+    pool = Pool(processes=4,initializer=initPool, initargs=[data])
+    deslab= pool.map(getKptsAndLabelsForImage, FLSubset)
+    pool.terminate()
 
-    def __init__(self):
-        # create the SIFT detector object
-        self.detector=cv2.SIFT(nfeatures = 100)
-        
-    def extractKeyPointsAndDescriptors(self,grayimage):
-        
-        kpt,des = self.detector.detectAndCompute(grayimage,None)
-        
-        return kpt,des
-        
+    Train_label_per_descriptor=[x[1] for x in deslab]
+    Train_descriptors=[x[0] for x in deslab]
+    
+    # Transform everything to numpy arrays
+    D=Train_descriptors[0]
+    L=np.array([Train_label_per_descriptor[0]]*Train_descriptors[0].shape[0])
+    
+    for i in range(1,len(Train_descriptors)):
+        D=np.vstack((D,Train_descriptors[i]))
+        L=np.hstack((L,np.array([Train_label_per_descriptor[i]]*Train_descriptors[i].shape[0])))
+    
+    return D,L
+    
+def getKptsAndLabelsForImage((filename,label)):
+    print 'Reading image '+filename+' with label '+label
+    descriptor_type=data
+    detector=getattr(sys.modules[__name__],'get'+descriptor_type+'Detector')()
+    
+    ima=cv2.imread(filename)
+    gray=cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
 
-#TODO: Add the rest of Descriptors as classes like the one above
-        
-class SURFDescriptor(AbstractDescriptor):
-    def __init__(self):
-        ## create the SURF detector object
-        self.detector=cv2.SURF(hessianThreshold=400)
-          
-    def extractKeyPointsAndDescriptors(self,grayimage):
-        #TODO:
-        kpt, des = self.detector.detectAndCompute(grayimage,None)
-        
-        return kpt,des
-        
-class ORBDescriptor(AbstractDescriptor):
-    def __init__(self):
-        # create the ORB detector object
-        self.detector = cv2.ORB_create(nfeatures=100)
-            
-    def extractKeyPointsAndDescriptors(self,grayimage):
-        kpt, des = self.detector.detectAndCompute(grayimage,None)
-        
-        return kpt,des
+    kpt,des=getKeyPointsDescriptors(detector,gray)
+
+    print str(len(kpt))+' extracted keypoints and descriptors'
+    return (des,label)
+
+
+#Multiprocessing utils
+def initPool(data_):
+    # data to share with processes
+    global data
+    data = data_
