@@ -13,10 +13,30 @@ SIFT 100 features, 30 samples
  PCA:20 31.59% in 181 secs.
  PCA:10 27.50% in 143 secs.
 
+
+SIFT 10 features, 70 samples, PCA:90 32.09% in 113 secs.
+SIFT 20 features, 70 samples, PCA:90 38.289% in 141 secs.
+SIFT 40 features, 70 samples, PCA:90 46.96% in 359 secs.
+SIFT 60 features, 70 samples, PCA:90 50.55% in 945 secs.
+SIFT 80 features, 70 samples, PCA:90 51.67% in 2938 secs.
+
+
+
+
+SIFT 10 features, 30 samples, PCA:90 28.87% in 54 secs.
+SIFT 20 features, 30 samples, PCA:90 34.07% in 79 secs.
+SIFT 40 features, 30 samples, PCA:90 35.68% in 138 secs.
+SIFT 60 features, 30 samples, PCA:90 37.17% in 428.05 secs.
+SIFT 80 features, 30 samples, PCA:90 38.04% in 553.83 secs.
+
+
+SIFT 100 features, 30 samples, PCA:90 40.64% in 674 secs.
 SIFT 110 features, 30 samples, PCA:90 39.15% in 693 secs.
 SIFT 120 features, 30 samples, PCA:90 38.90% in 789 secs.
 SIFT 130 features, 30 samples, PCA:90 39.40% in 995 secs.
 SIFT 140 features, 30 samples, PCA:90 39.65% in 1202 secs.
+SIFT 160 features, 30 samples, PCA:90 40.15% in 2369 secs.
+
 
 
 Samples 40 SIFT 100 PCA:90 41.88% in 1076 secs.

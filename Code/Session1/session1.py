@@ -20,7 +20,7 @@ mySIFTDescriptor=SIFTDescriptor();# SIFT Descriptor
 
 
 # Obtain descriptors and labels for the training set
-max_class_train_images = 70
+max_class_train_images = 30
 
 D,L=mySIFTDescriptor.extractFeatures(train_images_filenames,train_labels,max_class_train_images)
 #D,L=mySURFDescriptor.extractFeatures(train_images_filenames,train_labels,max_class_train_images)
@@ -34,8 +34,8 @@ number_components = 90
 D, pca = PCA_computing.PCA_to_data(D, number_components)
 
 # Train a linear SVM classifier
-mySVMClassifier=SVMClassifier(C=10,kernel_type='rbf',degree_value = 1, gamma_value = 0.01,weight = 'balanced')#SVMClassifier with C=1 and linear Kernel
-
+#mySVMClassifier=SVMClassifier(C=10,kernel_type='rbf',degree_value = 1, gamma_value = 0.01,weight = 'balanced')#SVMClassifier with C=1 and linear Kernel
+mySVMClassifier=SVMClassifier(C=1, kernel_type='linear', degree_value = 1, gamma_value = 0.01, weight = None)
 
 #TODO: Try other parameters for SVM
 clf, stdSlr=mySVMClassifier.train(D,L)
