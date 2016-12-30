@@ -11,7 +11,7 @@ from sklearn import svm
 from sklearn import cluster
 #import descriptors, SVMClassifiers, Evaluation, inputOutputUtils, PCA_computing
 
-def launchsession2():
+def launchsession2_pyramid():
     start = time.time()
     
     # read the train and test files
@@ -34,8 +34,8 @@ def launchsession2():
     
     Train_descriptors = []
     Train_label_per_descriptor = []
-    
-    
+    #Is a list where each position conatains a list of all keypoints for a certain image
+    Train_keypoints = []
     
     for i in range(len(train_images_filenames)):
         filename = train_images_filenames[i]
@@ -43,36 +43,41 @@ def launchsession2():
         ima = cv2.imread(filename)
         gray = cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
         kpt, des = SIFTdetector.detectAndCompute(gray, None)
-        
+        Train_keypoints.append(kpt)
         Train_descriptors.append(des)
         Train_label_per_descriptor.append(train_labels[i])
         print str(len(kpt)) + ' extracted keypoints and descriptors'
     
     # Transform everything to numpy arrays
     size_descriptors = Train_descriptors[0].shape[1]
-    D = np.zeros((np.sum([len(p) for p in Train_descriptors]),size_descriptors),dtype=np.uint8)
+    D = np.zeros((np.sum([len(p) for p in Train_descriptors]), size_descriptors), dtype = np.uint8)
     startingpoint = 0
     for i in range(len(Train_descriptors)):
-        D[startingpoint:startingpoint+len(Train_descriptors[i])]=Train_descriptors[i]
-        startingpoint+=len(Train_descriptors[i])
+        D[startingpoint:startingpoint + len(Train_descriptors[i])] = Train_descriptors[i]
+        startingpoint += len(Train_descriptors[i])
     
     #Computing bag of words using k-means
     k = 512
     
     print 'Computing kmeans with '+str(k)+' centroids'
-    init=time.time()
-    codebook = cluster.MiniBatchKMeans(n_clusters=k, verbose=False, batch_size=k * 20,compute_labels=False,reassignment_ratio=10**-4)
+    init = time.time()
+    codebook = cluster.MiniBatchKMeans(n_clusters = k, verbose = False, batch_size = k * 20, compute_labels = False,reassignment_ratio = 10**-4)
     codebook.fit(D)
     cPickle.dump(codebook, open("codebook.dat", "wb"))
-    end=time.time()
-    print 'Done in '+str(end-init)+' secs.'
+    end = time.time()
+    print 'Done in ' + str(end-init) + ' secs.'
     
-    #Determine visual words
-    init=time.time()
-    visual_words=np.zeros((len(Train_descriptors),k),dtype=np.float32)
+    #Determine visual words for whole image
+    init = time.time()
+    visual_words = np.zeros((len(Train_descriptors), k), dtype = np.float32)
+    #For each image, compute visual words:  we need to concatenate many histograms,
+    #one for each subimage
     for i in xrange(len(Train_descriptors)):
-        words=codebook.predict(Train_descriptors[i])
-        visual_words[i,:]=np.bincount(words,minlength=k)
+        #Predict the words of an image
+        words = codebook.predict(Train_descriptors[i])
+        #Save the histogram of the words
+        #Each row of visual_words contains the frequencies of each word in a certain image
+        visual_words[i, :] = np.bincount(words, minlength = k)
     
     end=time.time()
     print 'Done in '+str(end-init)+' secs.'
@@ -108,4 +113,4 @@ def launchsession2():
     ## 49.56% in 285 secs.
     
 if __name__ == '__main__':
-    launchsession2()
+    launchsession2_pyramid()
