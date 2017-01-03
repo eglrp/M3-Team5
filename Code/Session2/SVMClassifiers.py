@@ -38,7 +38,8 @@ def predict(test_images_filenames,descriptor_type,stdSlr, codebook,k, Use_spatia
         visual_words_test= pool.map(getVisualWordsForImage, test_images_filenames)
     
     pool.terminate()
-    
+    print type(visual_words_test)
+    print visual_words_test
     predictedLabels=stdSlr.transform(visual_words_test)
     
     #predictions=[str(x) for x in predictedLabels]
@@ -74,10 +75,12 @@ def getVisualWordsForImageSpatialPyramid(filename):
     
     detector = getattr(descriptors,'get'+descriptor_type+'Detector')()
     kpt, des = descriptors.getKeyPointsDescriptors(detector,gray)
-    visual_words = spt_py.spatial_pyramid(np.float32(gray.shape), des, kpt, codebook, k)
-    #Predict the label for each descriptor
-    words=codebook.predict(des)
-    visual_words=np.bincount(words,minlength=k)
+    coordinates_keypoints = []
+    for i in range(len(kpt)):
+        coordinates_keypoints.append(np.float32(kpt[i].pt))
+        
+    #Compute spatial pyramid    
+    visual_words = spt_py.spatial_pyramid(np.float32(gray.shape), des, coordinates_keypoints, codebook, k)
     
     return visual_words    
 def getPredictionForImageOld(filename):

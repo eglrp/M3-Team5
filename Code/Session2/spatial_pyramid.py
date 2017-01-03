@@ -11,9 +11,9 @@ def spatial_pyramid(size_image, descriptors, keypoints, codebook, k):
     
     
     #Transform keypoint objects to 2D coordinates
-    coordinates_keypoints = []
-    for i in range(len(keypoints)):
-        coordinates_keypoints.append(np.float32(keypoints[i].pt))
+#    coordinates_keypoints = []
+#    for i in range(len(keypoints)):
+#        coordinates_keypoints.append(np.float32(keypoints[i].pt))
         
     limits_whole_image = [[0, 0],[size_image[0], size_image[1]]]
     
@@ -26,7 +26,7 @@ def spatial_pyramid(size_image, descriptors, keypoints, codebook, k):
     
     #Second, we compute the histogram for the 4x4 subimages
     
-    visual_words_4x4 = words_subimages_4x4(limits_whole_image, descriptors, coordinates_keypoints, codebook, k, alpha_1)
+    visual_words_4x4 = words_subimages_4x4(limits_whole_image, descriptors, keypoints, codebook, k, alpha_1)
     
     visual_words_full[0, k:5*k ] = visual_words_4x4
     
@@ -38,7 +38,7 @@ def spatial_pyramid(size_image, descriptors, keypoints, codebook, k):
     subimages[3] =([[limits_whole_image[1][0]/2, limits_whole_image[1][1]/2], [limits_whole_image[1][0], limits_whole_image[1][1]]]) 
     
     for i in range(4):
-        visual_words_16x16 = words_subimages_4x4(subimages[i], descriptors, coordinates_keypoints, codebook, k, alpha_0)
+        visual_words_16x16 = words_subimages_4x4(subimages[i], descriptors, keypoints, codebook, k, alpha_0)
         visual_words_full[0, k*(5 + i*4):k*(5 + (i + 1)*4) ] = visual_words_16x16
     return visual_words_full  
 

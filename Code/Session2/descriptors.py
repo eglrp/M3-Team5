@@ -92,11 +92,14 @@ def getDescriptorsAndLabelsForImage((filename,label)):
     ima=cv2.imread(filename)
     gray=cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
 
-    kpt,des=getKeyPointsDescriptors(detector,gray)
-
+    kpt, des=getKeyPointsDescriptors(detector,gray)
+    
+    coordinates_keypoints = []
+    for i in range(len(kpt)):
+        coordinates_keypoints.append(np.float32(kpt[i].pt))
     print str(len(kpt))+' extracted keypoints and descriptors'
 #    return (des, label)
-    return (des, label,  np.float32(gray.shape))
+    return (des, label, coordinates_keypoints, np.float32(gray.shape))
 
 #Multiprocessing utils
 def initPool(data_):

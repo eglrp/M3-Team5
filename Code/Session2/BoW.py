@@ -26,7 +26,7 @@ def getVisualWords(codebook,k,Train_descriptors):
     end=time.time()
     print 'Done in '+str(end-init)+' secs.'
     return visual_words
-#Onofre    
+    
 def getVisualWordsSpatialPyramid(codebook, k, Train_descriptors, Train_image_size, Train_keypoints):
     print 'Computing visual words'
     init=time.time()
