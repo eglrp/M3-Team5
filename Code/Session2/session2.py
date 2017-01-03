@@ -7,17 +7,21 @@ import descriptors, SVMClassifiers, Evaluation, dataUtils,BoW
 
 def launchsession2():
     start = time.time()
-    
+    Use_spatial_pyramid = False
     # Read the train and test files
     train_images_filenames,test_images_filenames,train_labels,test_labels=dataUtils.readData()
     
     #Divide training into training and validation splits
-    train_percentage=0.6#60% training 40%validation
+    train_percentage=0.01#60% training 40%validation
     TrainingSplit, ValidationSplit=dataUtils.getTrainingValidationSplit(train_images_filenames,train_labels,train_percentage)
     
     
     #Get descriptors D
-    D,Train_descriptors,Train_label_per_descriptor=descriptors.extractFeatures(TrainingSplit,'SIFT')
+    if Use_spatial_pyramid:
+        D, Train_descriptors, Train_label_per_descriptor, Train_keypoints, Train_image_size = descriptors.extractFeatures(TrainingSplit,'SIFT')
+        sys.exit("Get here")
+    else:
+        D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeatures(TrainingSplit, 'SIFT')
     
     
     #Computing bag of words using k-means and save codebook
@@ -25,7 +29,10 @@ def launchsession2():
     codebook=BoW.computeCodebook(D,k)
 
     #Determine visual words
-    visual_words=BoW.getVisualWords(codebook,k,Train_descriptors)
+    if Use_spatial_pyramid:
+        visual_words = BoW.getVisualWordsSpatialPyramid(codebook, k, Train_descriptors, Train_image_size, Train_keypoints)
+    else:    
+        visual_words = BoW.getVisualWords(codebook, k, Train_descriptors)
     
     
     # Train a linear SVM classifier
@@ -34,7 +41,7 @@ def launchsession2():
     
     #For test set
     # Get all the test data and predict their labels
-    predictedLabels=SVMClassifiers.predict(test_images_filenames,'SIFT',stdSlr, codebook,k)
+    predictedLabels=SVMClassifiers.predict(test_images_filenames,'SIFT',stdSlr, codebook, k, Use_spatial_pyramid)
     
     #Compute accuracy
     accuracy = Evaluation.getMeanAccuracy(clf,predictedLabels,test_labels)
@@ -45,7 +52,7 @@ def launchsession2():
     #For validation set
     validation_images_filenames,validation_labels=dataUtils.unzipTupleList(ValidationSplit)
     # Get all the test data and predict their labels
-    predictedLabels=SVMClassifiers.predict(validation_images_filenames,'SIFT',stdSlr, codebook,k)
+    predictedLabels=SVMClassifiers.predict(validation_images_filenames,'SIFT',stdSlr, codebook, k, Use_spatial_pyramid)
 
     #Compute accuracy
     validation_accuracy = Evaluation.getMeanAccuracy(clf,predictedLabels,validation_labels)

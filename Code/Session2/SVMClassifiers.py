@@ -4,6 +4,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn import svm
 from multiprocessing import Pool
 import descriptors
+import spatial_pyramid as spt_py
 
 def trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linear',degree_value=1,gamma_value=0.01,weight = 'balanced'):
     # Train a SVM classifier
@@ -25,13 +26,17 @@ def trainSVMOld(D,L,Cparam=1,kernel_type='linear',degree_value=1,gamma_value=0.0
 
     return clf,stdSlr
 
-def predict(test_images_filenames,descriptor_type,stdSlr, codebook,k):
+def predict(test_images_filenames,descriptor_type,stdSlr, codebook,k, Use_spatial_pyramid):
     #Predict test set labels with the trained classifier
     data = [codebook,k,descriptor_type]#shared data with processes
     visual_words_test=np.zeros((len(test_images_filenames),k),dtype=np.float32)
     
     pool = Pool(processes=4,initializer=initPool, initargs=[data])
-    visual_words_test= pool.map(getVisualWordsForImage, test_images_filenames)
+    if Use_spatial_pyramid:
+        visual_words_test= pool.map(getVisualWordsForImageSpatialPyramid, test_images_filenames)
+    else:
+        visual_words_test= pool.map(getVisualWordsForImage, test_images_filenames)
+    
     pool.terminate()
     
     predictedLabels=stdSlr.transform(visual_words_test)
@@ -59,6 +64,22 @@ def getVisualWordsForImage(filename):
     
     return visual_words
     
+def getVisualWordsForImageSpatialPyramid(filename):
+    codebook = data[0]
+    k = data[1]
+    descriptor_type = data[2]
+    
+    ima = cv2.imread(filename)
+    gray = cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
+    
+    detector = getattr(descriptors,'get'+descriptor_type+'Detector')()
+    kpt, des = descriptors.getKeyPointsDescriptors(detector,gray)
+    visual_words = spt_py.spatial_pyramid(np.float32(gray.shape), des, kpt, codebook, k)
+    #Predict the label for each descriptor
+    words=codebook.predict(des)
+    visual_words=np.bincount(words,minlength=k)
+    
+    return visual_words    
 def getPredictionForImageOld(filename):
     computedPca=data[0]
     computedClf=data[1]

@@ -2,6 +2,7 @@ import time
 import cPickle
 from sklearn import cluster
 import numpy as np
+import spatial_pyramid as spt_py
 
 def computeCodebook(D,k):
     print 'Computing kmeans with '+str(k)+' centroids'
@@ -15,6 +16,7 @@ def computeCodebook(D,k):
     return codebook
     
 def getVisualWords(codebook,k,Train_descriptors):
+    print 'Computing visual words'
     init=time.time()
     visual_words=np.zeros((len(Train_descriptors),k),dtype=np.float32)
     for i in xrange(len(Train_descriptors)):
@@ -24,3 +26,14 @@ def getVisualWords(codebook,k,Train_descriptors):
     end=time.time()
     print 'Done in '+str(end-init)+' secs.'
     return visual_words
+#Onofre    
+def getVisualWordsSpatialPyramid(codebook, k, Train_descriptors, Train_image_size, Train_keypoints):
+    print 'Computing visual words'
+    init=time.time()
+    visual_words=np.zeros((len(Train_descriptors),21*k),dtype=np.float32)
+    for i in xrange(len(Train_descriptors)):
+        visual_words[i, :] = spt_py.spatial_pyramid(Train_image_size[i], Train_descriptors[i], Train_keypoints[i], codebook, k)
+    
+    end=time.time()
+    print 'Done in '+str(end-init)+' secs.'
+    return visual_words    

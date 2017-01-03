@@ -21,11 +21,11 @@ def getKeyPointsDescriptors(detector,image):
     return kpt,des
 
 #Extract features methods
-def extractFeatures(FLSubset,descriptor_type):
+def extractFeatures(FLSubset, descriptor_type):
     data=descriptor_type
     
     pool = Pool(processes=4,initializer=initPool, initargs=[data])
-    deslab= pool.map(getDescriptorsAndLabelsForImage, FLSubset)
+    deslab = pool.map(getDescriptorsAndLabelsForImage, FLSubset)
     pool.terminate()
 
     Train_label_per_descriptor=[x[1] for x in deslab]
@@ -40,6 +40,29 @@ def extractFeatures(FLSubset,descriptor_type):
         startingpoint+=len(Train_descriptors[i])
     
     return D,Train_descriptors,Train_label_per_descriptor#,L
+    
+def extractFeaturesPyramid(FLSubset, descriptor_type):
+    data=descriptor_type
+    
+    pool = Pool(processes=4,initializer=initPool, initargs=[data])
+    deslab = pool.map(getDescriptorsAndLabelsForImage, FLSubset)
+    pool.terminate()
+
+    Train_label_per_descriptor=[x[1] for x in deslab]
+    Train_descriptors=[x[0] for x in deslab]
+    Train_keypoints = [x[2] for x in deslab]
+    Train_image_size= [x[3] for x in deslab]
+    
+    # Transform everything to numpy arrays
+    size_descriptors = Train_descriptors[0].shape[1]
+    D = np.zeros((np.sum([len(p) for p in Train_descriptors]),size_descriptors),dtype=np.uint8)
+    startingpoint = 0
+    for i in range(len(Train_descriptors)):
+        D[startingpoint:startingpoint+len(Train_descriptors[i])]=Train_descriptors[i]
+        startingpoint+=len(Train_descriptors[i])
+    
+#    return D,Train_descriptors,Train_label_per_descriptor#,L
+    return D, Train_descriptors, Train_label_per_descriptor, Train_keypoints, Train_image_size#Onofre
     
 def extractFeaturesOld(FLSubset,descriptor_type):
     data=descriptor_type
@@ -72,8 +95,8 @@ def getDescriptorsAndLabelsForImage((filename,label)):
     kpt,des=getKeyPointsDescriptors(detector,gray)
 
     print str(len(kpt))+' extracted keypoints and descriptors'
-    return (des,label)
-
+#    return (des, label)
+    return (des, label,  np.float32(gray.shape))
 
 #Multiprocessing utils
 def initPool(data_):
