@@ -38,8 +38,8 @@ def predict(test_images_filenames,descriptor_type,stdSlr, codebook,k, Use_spatia
         visual_words_test= pool.map(getVisualWordsForImage, test_images_filenames)
     
     pool.terminate()
-    print type(visual_words_test)
-    print visual_words_test
+    visual_words_test = np.asarray(visual_words_test, dtype = np.float64)
+
     predictedLabels=stdSlr.transform(visual_words_test)
     
     #predictions=[str(x) for x in predictedLabels]

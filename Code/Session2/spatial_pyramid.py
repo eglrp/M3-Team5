@@ -17,7 +17,7 @@ def spatial_pyramid(size_image, descriptors, keypoints, codebook, k):
         
     limits_whole_image = [[0, 0],[size_image[0], size_image[1]]]
     
-    visual_words_full = np.zeros((1, 21*k), dtype = np.float32)
+    visual_words_full = np.zeros((1, 21*k), dtype = np.int64)
     
     #First, we compute the histogram for the whole image
     words = codebook.predict(descriptors)

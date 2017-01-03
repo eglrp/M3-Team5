@@ -7,7 +7,7 @@ import descriptors, SVMClassifiers, Evaluation, dataUtils,BoW
 
 def launchsession2():
     start = time.time()
-    Use_spatial_pyramid = True
+    Use_spatial_pyramid = False
     # Read the train and test files
     train_images_filenames,test_images_filenames,train_labels,test_labels=dataUtils.readData()
     
@@ -33,8 +33,6 @@ def launchsession2():
     
     else:    
         visual_words = BoW.getVisualWords(codebook, k, Train_descriptors)
-    
-    print type(visual_words)
     
     
     # Train a linear SVM classifier
