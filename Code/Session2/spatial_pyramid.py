@@ -8,12 +8,6 @@ def spatial_pyramid(size_image, descriptors, keypoints, codebook, k):
     alpha_0 = 1/2
     alpha_1 = 1/4
     alpha_2 = 1/4
-    
-    
-    #Transform keypoint objects to 2D coordinates
-#    coordinates_keypoints = []
-#    for i in range(len(keypoints)):
-#        coordinates_keypoints.append(np.float32(keypoints[i].pt))
         
     limits_whole_image = [[0, 0],[size_image[0], size_image[1]]]
     
@@ -40,6 +34,7 @@ def spatial_pyramid(size_image, descriptors, keypoints, codebook, k):
     for i in range(4):
         visual_words_16x16 = words_subimages_4x4(subimages[i], descriptors, keypoints, codebook, k, alpha_0)
         visual_words_full[0, k*(5 + i*4):k*(5 + (i + 1)*4) ] = visual_words_16x16
+                          
     return visual_words_full  
 
 
@@ -73,24 +68,20 @@ def words_subimages_4x4(limits_image, descriptors, coordinates_keypoints, codebo
         if x > subimages[0, 0, 0] and y > subimages[0, 0, 1] and x < subimages[0, 1, 0] and y < subimages[0, 1, 1]:
             
             #Belongs to upperleft subimage
-#            descriptors_subimage00 = np.append(descriptors_subimage00, descriptors[i], axis = 0)
             descriptors_subimage00.append(descriptors[i])
             
         elif x > subimages[1, 0, 0] and y > subimages[1, 0, 1] and x < subimages[1, 1, 0] and y < subimages[1, 1, 1]:
             
             #Belongs to upperright subimage
-#            descriptors_subimage01 = np.append(descriptors_subimage01, descriptors[i], axis = 0)
             descriptors_subimage01.append(descriptors[i])
 
         elif x > subimages[2, 0, 0] and y > subimages[2, 0, 1] and x < subimages[2, 1, 0] and y < subimages[2, 1, 1]:    
             
             #Belongs to downleft subimage
-#            descriptors_subimage10 = np.append(descriptors_subimage10, descriptors[i], axis = 0)
             descriptors_subimage10.append(descriptors[i])
         else:
             
             #Belongs to downright subimage
-#            descriptors_subimage11 = np.append(descriptors_subimage11, descriptors[i], axis = 0)
             descriptors_subimage11.append(descriptors[i])
     #Compute histogram for all points of each subimage
     visual_words = np.zeros((1, 4*k), dtype = np.float32)

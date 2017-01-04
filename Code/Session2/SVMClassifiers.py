@@ -29,18 +29,24 @@ def trainSVMOld(D,L,Cparam=1,kernel_type='linear',degree_value=1,gamma_value=0.0
 def predict(test_images_filenames,descriptor_type,stdSlr, codebook,k, Use_spatial_pyramid):
     #Predict test set labels with the trained classifier
     data = [codebook,k,descriptor_type]#shared data with processes
-    visual_words_test=np.zeros((len(test_images_filenames),k),dtype=np.float32)
+    
     
     pool = Pool(processes=4,initializer=initPool, initargs=[data])
     if Use_spatial_pyramid:
-        visual_words_test= pool.map(getVisualWordsForImageSpatialPyramid, test_images_filenames)
+#        visual_words_test=np.zeros((len(test_images_filenames), 21*k),dtype=np.float32)
+        visual_words_test = pool.map(getVisualWordsForImageSpatialPyramid, test_images_filenames)
+        
+        vw = np.zeros([len(visual_words_test), len(visual_words_test[0][0])], dtype = np.float32)
+        for i in range(len(visual_words_test)):
+            vw[i, :] = visual_words_test[0][0]
+        visual_words_test = vw    
     else:
+        visual_words_test=np.zeros((len(test_images_filenames),k), dtype=np.float32)
         visual_words_test= pool.map(getVisualWordsForImage, test_images_filenames)
     
     pool.terminate()
-    visual_words_test = np.asarray(visual_words_test, dtype = np.float64)
 
-    predictedLabels=stdSlr.transform(visual_words_test)
+    predictedLabels = stdSlr.transform(visual_words_test)
     
     #predictions=[str(x) for x in predictedLabels]
     
@@ -83,6 +89,7 @@ def getVisualWordsForImageSpatialPyramid(filename):
     visual_words = spt_py.spatial_pyramid(np.float32(gray.shape), des, coordinates_keypoints, codebook, k)
     
     return visual_words    
+    
 def getPredictionForImageOld(filename):
     computedPca=data[0]
     computedClf=data[1]

@@ -6,6 +6,7 @@ import time
 import descriptors, SVMClassifiers, Evaluation, dataUtils,BoW
 
 def launchsession2():
+    
     start = time.time()
     Use_spatial_pyramid = False
     # Read the train and test files
@@ -30,7 +31,6 @@ def launchsession2():
     #Determine visual words
     if Use_spatial_pyramid:
         visual_words = BoW.getVisualWordsSpatialPyramid(codebook, k, Train_descriptors, Train_image_size, Train_keypoints)
-    
     else:    
         visual_words = BoW.getVisualWords(codebook, k, Train_descriptors)
     
@@ -38,11 +38,10 @@ def launchsession2():
     # Train a linear SVM classifier
     clf, stdSlr=SVMClassifiers.trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linear')
     
-    
     #For test set
     # Get all the test data and predict their labels
     predictedLabels=SVMClassifiers.predict(test_images_filenames,'SIFT',stdSlr, codebook, k, Use_spatial_pyramid)
-    
+
     #Compute accuracy
     accuracy = Evaluation.getMeanAccuracy(clf,predictedLabels,test_labels)
     
