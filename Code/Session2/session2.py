@@ -34,37 +34,38 @@ def launchsession2():
         visual_words = BoW.getVisualWords(codebook, k, Train_descriptors)
     
     # Train a linear SVM classifier
-    clf, stdSlr=SVMClassifiers.trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linear')
-    
-    
-    #For test set
-    # Get all the test data and predict their labels
-    predictedLabels=SVMClassifiers.predict(test_images_filenames,'SIFT',stdSlr, codebook, k, Use_spatial_pyramid)
-    #Compute accuracy
-    accuracy = Evaluation.getMeanAccuracy(clf,predictedLabels,test_labels)
-    print 'Final test accuracy: ' + str(accuracy)
-    
-    #Kernel intersection
     if useKernelInter:
+        #Kernel intersection
         clf2, stdSlr2,train_scaled=SVMClassifiers.trainSVMKIntersection(visual_words,Train_label_per_descriptor,Cparam=1)
+    else:
+        clf, stdSlr=SVMClassifiers.trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linear')
+
+
+    #For test set
+    if useKernelInter:
         predictedLabels2=SVMClassifiers.predictKernelIntersection(test_images_filenames,'SIFT',clf2,stdSlr2,train_scaled,k,codebook)
         accuracy2 = Evaluation.computeAccuracyOld(predictedLabels2,test_labels)
         print 'Final Kernel intersection test accuracy: ' + str(accuracy2)
-    
-    
+    else:
+        # Get all the test data and predict their labels
+        predictedLabels=SVMClassifiers.predict(test_images_filenames,'SIFT',stdSlr, codebook, k, Use_spatial_pyramid)
+        #Compute accuracy
+        accuracy = Evaluation.getMeanAccuracy(clf,predictedLabels,test_labels)
+        print 'Final test accuracy: ' + str(accuracy)
+
     #For validation set
     validation_images_filenames,validation_labels=dataUtils.unzipTupleList(ValidationSplit)
-    # Get all the test data and predict their labels
-    predictedLabels=SVMClassifiers.predict(validation_images_filenames,'SIFT',stdSlr, codebook, k, Use_spatial_pyramid)
-    #Compute accuracy
-    validation_accuracy = Evaluation.getMeanAccuracy(clf,predictedLabels,validation_labels)
-    print 'Final validation accuracy: ' + str(validation_accuracy)
-    
-    #Kernel intersection
     if useKernelInter:
+        #Kernel intersection
         predictedLabels2=SVMClassifiers.predictKernelIntersection(validation_images_filenames,'SIFT',clf2,stdSlr2,train_scaled,k,codebook)
         accuracy2 = Evaluation.computeAccuracyOld(predictedLabels2,validation_labels)
         print 'Final Kernel intersection validation accuracy: ' + str(accuracy2)
+    else:
+        # Get all the test data and predict their labels
+        predictedLabels=SVMClassifiers.predict(validation_images_filenames,'SIFT',stdSlr, codebook, k, Use_spatial_pyramid)
+        #Compute accuracy
+        validation_accuracy = Evaluation.getMeanAccuracy(clf,predictedLabels,validation_labels)
+        print 'Final validation accuracy: ' + str(validation_accuracy)
     
     end=time.time()
     print 'Done in '+str(end-start)+' secs.'

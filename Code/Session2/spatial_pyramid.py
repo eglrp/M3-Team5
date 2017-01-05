@@ -5,9 +5,9 @@ import numpy as np
 #the image in 4 parts
 def spatial_pyramid(size_image, descriptors, keypoints, codebook, k):
     
-    alpha_0 = 1/2
-    alpha_1 = 1/4
-    alpha_2 = 1/4
+    alpha_0 = 1.0/2
+    alpha_1 = 1.0/4
+    alpha_2 = 1.0/4
         
     limits_whole_image = [[0, 0],[size_image[0], size_image[1]]]
     

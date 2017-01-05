@@ -53,7 +53,6 @@ def extractFeaturesPyramid(FLSubset, descriptor_type):
     Train_keypoints = [x[2] for x in deslab]
     Train_image_size= [x[3] for x in deslab]
     
-    # Transform everything to numpy arrays
     size_descriptors = Train_descriptors[0].shape[1]
     D = np.zeros((np.sum([len(p) for p in Train_descriptors]),size_descriptors),dtype=np.uint8)
     startingpoint = 0
@@ -61,8 +60,7 @@ def extractFeaturesPyramid(FLSubset, descriptor_type):
         D[startingpoint:startingpoint+len(Train_descriptors[i])]=Train_descriptors[i]
         startingpoint+=len(Train_descriptors[i])
     
-#    return D,Train_descriptors,Train_label_per_descriptor#,L
-    return D, Train_descriptors, Train_label_per_descriptor, Train_keypoints, Train_image_size#Onofre
+    return D, Train_descriptors, Train_label_per_descriptor, Train_keypoints, Train_image_size
     
 def extractFeaturesOld(FLSubset,descriptor_type):
     data=descriptor_type
@@ -94,9 +92,7 @@ def getDescriptorsAndLabelsForImage((filename,label)):
 
     kpt, des=getKeyPointsDescriptors(detector,gray)
     
-    coordinates_keypoints = []
-    for i in range(len(kpt)):
-        coordinates_keypoints.append(np.float32(kpt[i].pt))
+    coordinates_keypoints = [kp.pt for kp in kpt]
     print str(len(kpt))+' extracted keypoints and descriptors'
 #    return (des, label)
     return (des, label, coordinates_keypoints, np.float32(gray.shape))

@@ -43,7 +43,7 @@ def predict(test_images_filenames,descriptor_type,stdSlr, codebook,k, Use_spatia
         
         vw = np.zeros([len(visual_words_test), len(visual_words_test[0][0])], dtype = np.float32)
         for i in range(len(visual_words_test)):
-            vw[i, :] = visual_words_test[0][0]
+            vw[i, :] = visual_words_test[i][0]
         visual_words_test = vw    
     else:
         visual_words_test=np.zeros((len(test_images_filenames),k), dtype=np.float32)
@@ -65,12 +65,6 @@ def predictKernelIntersection(test_images_filenames,descriptor_type,clf,stdSlr,t
     pool = Pool(processes=4,initializer=initPool, initargs=[data])
     predictedClasses= pool.map(getPredictionForImageKIntersection, test_images_filenames)
     pool.terminate()
-    #initPool(data)
-    #predictedClasses=np.chararray(len(test_images_filenames),itemsize=20)
-    #i=0
-    #for filename in test_images_filenames:
-    #    predictedClasses[i]=getPredictionForImageKIntersection(filename)
-    #    i=i+1
     
     predictions=[str(x) for x in predictedClasses]
     
@@ -103,9 +97,7 @@ def getVisualWordsForImageSpatialPyramid(filename):
     
     detector = getattr(descriptors,'get'+descriptor_type+'Detector')()
     kpt, des = descriptors.getKeyPointsDescriptors(detector,gray)
-    coordinates_keypoints = []
-    for i in range(len(kpt)):
-        coordinates_keypoints.append(np.float32(kpt[i].pt))
+    coordinates_keypoints = [kp.pt for kp in kpt]
     
     #Compute spatial pyramid
     visual_words = spt_py.spatial_pyramid(np.float32(gray.shape), des, coordinates_keypoints, codebook, k)
