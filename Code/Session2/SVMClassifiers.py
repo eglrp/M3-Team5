@@ -5,6 +5,7 @@ from sklearn import svm
 from multiprocessing import Pool
 import descriptors
 import spatial_pyramid as spt_py
+import kernelIntersection
 
 def trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linear',degree_value=1,gamma_value=0.01,weight = 'balanced'):
     # Train a SVM classifier
@@ -15,16 +16,20 @@ def trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linea
     print 'Done!'
 
     return clf,stdSlr
-    
-def trainSVMOld(D,L,Cparam=1,kernel_type='linear',degree_value=1,gamma_value=0.01,weight = 'balanced'):
+ 
+def trainSVMKIntersection(visual_words,Train_label_per_descriptor,Cparam=1):
     # Train a SVM classifier
-    stdSlr = StandardScaler().fit(D)
-    D_scaled = stdSlr.transform(D)
+    stdSlr = StandardScaler().fit(visual_words)
+    D_scaled = stdSlr.transform(visual_words)
+    kernelMatrix =kernelIntersection.histogramIntersection(D_scaled,D_scaled)
     print 'Training the SVM classifier...'
-    clf = svm.SVC(kernel=kernel_type, C=Cparam,degree=degree_value,gamma=gamma_value,class_weight=weight).fit(D_scaled, L)
+    clf = svm.SVC(kernel='precomputed', C=Cparam)
+    #temp = kernelMatrix.reshape(1,-1)
+    temp=np.tile(kernelMatrix, (len(kernelMatrix), 1))
+    #clf.fit(kernelMatrix, Train_label_per_descriptor)
+    clf.fit(temp, Train_label_per_descriptor)
     print 'Done!'
-
-    return clf,stdSlr
+    return clf,stdSlr,D_scaled
 
 def predict(test_images_filenames,descriptor_type,stdSlr, codebook,k, Use_spatial_pyramid):
     #Predict test set labels with the trained classifier
@@ -52,7 +57,24 @@ def predict(test_images_filenames,descriptor_type,stdSlr, codebook,k, Use_spatia
     
     #return predictions
     return predictedLabels
-
+    
+def predictKernelIntersection(test_images_filenames,descriptor_type,clf,stdSlr,train_scaled,k,codebook):
+    #Predict test set labels with the trained classifier
+    data = [train_scaled,clf,stdSlr,descriptor_type,k,codebook]#shared data with processes
+    
+    pool = Pool(processes=4,initializer=initPool, initargs=[data])
+    predictedClasses= pool.map(getPredictionForImageKIntersection, test_images_filenames)
+    pool.terminate()
+    #initPool(data)
+    #predictedClasses=np.chararray(len(test_images_filenames),itemsize=20)
+    #i=0
+    #for filename in test_images_filenames:
+    #    predictedClasses[i]=getPredictionForImageKIntersection(filename)
+    #    i=i+1
+    
+    predictions=[str(x) for x in predictedClasses]
+    
+    return predictions
 
 def getVisualWordsForImage(filename):
     codebook=data[0]
@@ -84,30 +106,44 @@ def getVisualWordsForImageSpatialPyramid(filename):
     coordinates_keypoints = []
     for i in range(len(kpt)):
         coordinates_keypoints.append(np.float32(kpt[i].pt))
-        
-    #Compute spatial pyramid    
+    
+    #Compute spatial pyramid
     visual_words = spt_py.spatial_pyramid(np.float32(gray.shape), des, coordinates_keypoints, codebook, k)
     
-    return visual_words    
+    return visual_words
     
-def getPredictionForImageOld(filename):
-    computedPca=data[0]
+def getPredictionForImageKIntersection(filename):
+    train_scaled=data[0]
     computedClf=data[1]
     computedstdSlr=data[2]
     descriptor_type=data[3]
+    k=data[4]
+    codebook=data[5]
     
     ima=cv2.imread(filename)
     gray=cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
     
     detector=getattr(descriptors,'get'+descriptor_type+'Detector')()
     kpt,des=descriptors.getKeyPointsDescriptors(detector,gray)
-
-    #Reduce the dimensionality of the data (PCA)
-    new_des = computedPca.transform(des)
+    
+    words=codebook.predict(des)
+    test_visual_words=np.bincount(words,minlength=k)
+    
+    test_scaled=computedstdSlr.transform(test_visual_words)
+    tem=test_scaled.reshape(1,-1)
+    temp=np.tile(tem, (len(train_scaled), 1))
+    
     
     #Predict the label for each descriptor
-    predictions = computedClf.predict(computedstdSlr.transform(new_des))
-    values, counts = np.unique(predictions, return_counts=True)
+    #predictMatrix = kernelIntersection.histogramIntersection(test_scaled, train_scaled)
+    predictMatrix = kernelIntersection.histogramIntersection(temp, train_scaled)
+
+    
+    temp=np.tile(predictMatrix, (len(train_scaled), 1))
+    
+    SVMpredictions = computedClf.predict(temp)
+    
+    values, counts = np.unique(SVMpredictions, return_counts=True)
     predictedClass = values[np.argmax(counts)]
     
     return predictedClass
