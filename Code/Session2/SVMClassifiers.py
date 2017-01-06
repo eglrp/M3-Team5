@@ -58,12 +58,16 @@ def predict(test_images_filenames,descriptor_type,stdSlr, codebook,k, Use_spatia
     #return predictions
     return predictedLabels
     
-def predictKernelIntersection(test_images_filenames,descriptor_type,clf,stdSlr,train_scaled,k,codebook):
+def predictKernelIntersection(test_images_filenames,descriptor_type,clf,stdSlr,train_scaled,k,codebook,Use_spatial_pyramid):
     #Predict test set labels with the trained classifier
     data = [train_scaled,clf,stdSlr,descriptor_type,k,codebook]#shared data with processes
     
     pool = Pool(processes=4,initializer=initPool, initargs=[data])
-    predictedClasses= pool.map(getPredictionForImageKIntersection, test_images_filenames)
+    if Use_spatial_pyramid:
+        predictedClasses= pool.map(getPredictionForImageKIntersectionSpatialPyramid, test_images_filenames)
+    else:
+        predictedClasses= pool.map(getPredictionForImageKIntersection, test_images_filenames)
+    
     pool.terminate()
     
     predictions=[str(x) for x in predictedClasses]
@@ -75,11 +79,7 @@ def getVisualWordsForImage(filename):
     k=data[1]
     descriptor_type=data[2]
     
-    ima=cv2.imread(filename)
-    gray=cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
-    
-    detector=getattr(descriptors,'get'+descriptor_type+'Detector')()
-    kpt,des=descriptors.getKeyPointsDescriptors(detector,gray)
+    kpt,des=getKptDesForImage(filename,descriptor_type)
 
     #Predict the label for each descriptor
     words=codebook.predict(des)
@@ -112,11 +112,7 @@ def getPredictionForImageKIntersection(filename):
     k=data[4]
     codebook=data[5]
     
-    ima=cv2.imread(filename)
-    gray=cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
-    
-    detector=getattr(descriptors,'get'+descriptor_type+'Detector')()
-    kpt,des=descriptors.getKeyPointsDescriptors(detector,gray)
+    kpt,des=getKptDesForImage(filename,descriptor_type)
     
     words=codebook.predict(des)
     test_visual_words=np.bincount(words,minlength=k)
@@ -139,8 +135,51 @@ def getPredictionForImageKIntersection(filename):
     predictedClass = values[np.argmax(counts)]
     
     return predictedClass
+    
+def getPredictionForImageKIntersectionSpatialPyramid(filename):
+    train_scaled=data[0]
+    computedClf=data[1]
+    computedstdSlr=data[2]
+    descriptor_type=data[3]
+    k=data[4]
+    codebook=data[5]
+    
+    ima = cv2.imread(filename)
+    gray = cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
+    
+    detector = getattr(descriptors,'get'+descriptor_type+'Detector')()
+    kpt, des = descriptors.getKeyPointsDescriptors(detector,gray)
+    coordinates_keypoints = [kp.pt for kp in kpt]
 
+    test_visual_words = spt_py.spatial_pyramid(np.float32(gray.shape), des, coordinates_keypoints, codebook, k)
+    
+    test_scaled=computedstdSlr.transform(test_visual_words)
+    tem=test_scaled.reshape(1,-1)
+    temp=np.tile(tem, (len(train_scaled), 1))
+    
+    
+    #Predict the label for each descriptor
+    predictMatrix = kernelIntersection.histogramIntersection(temp, train_scaled)
 
+    
+    temp=np.tile(predictMatrix, (len(train_scaled), 1))
+    
+    SVMpredictions = computedClf.predict(temp)
+    
+    values, counts = np.unique(SVMpredictions, return_counts=True)
+    predictedClass = values[np.argmax(counts)]
+    
+    return predictedClass
+
+def getKptDesForImage(filename,descriptor_type):
+    ima=cv2.imread(filename)
+    gray=cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
+    
+    detector=getattr(descriptors,'get'+descriptor_type+'Detector')()
+    kpt,des=descriptors.getKeyPointsDescriptors(detector,gray)
+    
+    return kpt,des
+    
 #Multiprocessing utils
 def initPool(data_):
     # data to share with processes

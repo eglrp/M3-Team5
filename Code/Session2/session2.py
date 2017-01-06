@@ -8,7 +8,7 @@ import descriptors, SVMClassifiers, Evaluation, dataUtils,BoW
 def launchsession2():
     start = time.time()
     Use_spatial_pyramid = False
-    useKernelInter=False
+    useKernelInter = False
     
     # Read the train and test files
     train_images_filenames,test_images_filenames,train_labels,test_labels=dataUtils.readData()
@@ -36,14 +36,14 @@ def launchsession2():
     # Train a linear SVM classifier
     if useKernelInter:
         #Kernel intersection
-        clf2, stdSlr2,train_scaled=SVMClassifiers.trainSVMKIntersection(visual_words,Train_label_per_descriptor,Cparam=1)
+        clf, stdSlr,train_scaled=SVMClassifiers.trainSVMKIntersection(visual_words,Train_label_per_descriptor,Cparam=1)
     else:
         clf, stdSlr=SVMClassifiers.trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linear')
 
 
     #For test set
     if useKernelInter:
-        predictedLabels2=SVMClassifiers.predictKernelIntersection(test_images_filenames,'SIFT',clf2,stdSlr2,train_scaled,k,codebook)
+        predictedLabels2=SVMClassifiers.predictKernelIntersection(test_images_filenames,'SIFT',clf,stdSlr,train_scaled,k,codebook,Use_spatial_pyramid)
         accuracy2 = Evaluation.computeAccuracyOld(predictedLabels2,test_labels)
         print 'Final Kernel intersection test accuracy: ' + str(accuracy2)
     else:
@@ -57,7 +57,7 @@ def launchsession2():
     validation_images_filenames,validation_labels=dataUtils.unzipTupleList(ValidationSplit)
     if useKernelInter:
         #Kernel intersection
-        predictedLabels2=SVMClassifiers.predictKernelIntersection(validation_images_filenames,'SIFT',clf2,stdSlr2,train_scaled,k,codebook)
+        predictedLabels2=SVMClassifiers.predictKernelIntersection(validation_images_filenames,'SIFT',clf,stdSlr,train_scaled,k,codebook,Use_spatial_pyramid)
         accuracy2 = Evaluation.computeAccuracyOld(predictedLabels2,validation_labels)
         print 'Final Kernel intersection validation accuracy: ' + str(accuracy2)
     else:
