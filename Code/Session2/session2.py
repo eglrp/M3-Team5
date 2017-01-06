@@ -15,7 +15,7 @@ def launchsession2():
     
     #Divide training into training and validation splits
     train_percentage=0.7#70% training 30%validation
-    TrainingSplit, ValidationSplit=dataUtils.getTrainingValidationSplit(train_images_filenames,train_labels,train_percentage)
+    TrainingSplit, ValidationSplit=dataUtils.getRandomTrainingValidationSplit(train_images_filenames,train_labels,train_percentage)
     
     #Get descriptors D
     if Use_spatial_pyramid:
