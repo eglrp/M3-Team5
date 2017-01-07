@@ -10,8 +10,8 @@ def launchsession2():
     Use_spatial_pyramid = False
     useKernelInter = False
     randomSplits = False
-    # "SIFT", "SURF", "ORB", "HARRIS", "FAST", "STAR", "MSER", "DENSE"
-    descriptor_type = "SIFT"
+    # "SIFT", "SURF", "ORB", "HARRIS", "DENSE"
+    descriptor_type = "DENSE"
     
     # Read the train and test files
     train_images_filenames,test_images_filenames,train_labels,test_labels=dataUtils.readData()

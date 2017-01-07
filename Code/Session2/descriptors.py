@@ -45,12 +45,33 @@ def getDENSEDetector():
     detector.setInt("initXyStep",10)
     detector.setInt("initFeatureScale",30)
     detector.setInt("initImgBound",10)
+
+#    detector = cv2.FeatureDetector_create("DENSE")
+#    detector.setInt("initXyStep",10)
+#    detector.setInt("initFeatureScale",30)
+#    detector.setInt("initImgBound",10)
+    detector = None
     
     return detector
+    
+
+    
 def getKeyPointsDescriptors(detector,image,descriptor_type):
     #Descriptors
     if descriptor_type == 'SIFT' :
         kpt,des=detector.detectAndCompute(image,None)
+    elif descriptor_type=='DENSE':
+        
+        sift=getSIFTDetector()
+        kp1 = np.zeros((image.shape[0]*image.shape[1])/100)
+        k=0
+        for x in xrange(int(0,image.shape[0],10)):
+            for y in xrange(int(0,image.shape[1],10)):
+                kp1[k] = cv2.KeyPoint([x,y,np.random.randint(10, 30)])   
+                k=k+1
+                print(k)
+        kpt,des=sift.compute(image,kp1)
+       
     else:
         sift=getSIFTDetector()
         kp1=detector.detect(image,None)
