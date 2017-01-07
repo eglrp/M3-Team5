@@ -79,7 +79,7 @@ def getVisualWordsForImage(filename):
     gray=cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
     
     detector=getattr(descriptors,'get'+descriptor_type+'Detector')()
-    kpt,des=descriptors.getKeyPointsDescriptors(detector,gray)
+    kpt,des=descriptors.getKeyPointsDescriptors(detector,gray,descriptor_type)
 
     #Predict the label for each descriptor
     words=codebook.predict(des)
@@ -96,7 +96,7 @@ def getVisualWordsForImageSpatialPyramid(filename):
     gray = cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
     
     detector = getattr(descriptors,'get'+descriptor_type+'Detector')()
-    kpt, des = descriptors.getKeyPointsDescriptors(detector,gray)
+    kpt, des = descriptors.getKeyPointsDescriptors(detector,gray,descriptor_type)
     coordinates_keypoints = [kp.pt for kp in kpt]
     
     #Compute spatial pyramid
@@ -116,7 +116,7 @@ def getPredictionForImageKIntersection(filename):
     gray=cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
     
     detector=getattr(descriptors,'get'+descriptor_type+'Detector')()
-    kpt,des=descriptors.getKeyPointsDescriptors(detector,gray)
+    kpt,des=descriptors.getKeyPointsDescriptors(detector,gray,descriptor_type)
     
     words=codebook.predict(des)
     test_visual_words=np.bincount(words,minlength=k)
