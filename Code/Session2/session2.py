@@ -18,6 +18,7 @@ def launchsession2():
     #Divide training into training and validation splits
     train_percentage=0.7#70% training 30%validation
     TrainingSplit, ValidationSplit=dataUtils.getTrainingValidationSplit(train_images_filenames,train_labels,train_percentage)
+    TrainingSplit, ValidationSplit=dataUtils.getRandomTrainingValidationSplit(train_images_filenames,train_labels,train_percentage)
     
     #Get descriptors D
     if Use_spatial_pyramid:
@@ -39,13 +40,18 @@ def launchsession2():
     if useKernelInter:
         #Kernel intersection
         clf2, stdSlr2,train_scaled=SVMClassifiers.trainSVMKIntersection(visual_words,Train_label_per_descriptor,Cparam=1)
+        clf, stdSlr,train_scaled=SVMClassifiers.trainSVMKIntersection(visual_words,Train_label_per_descriptor,Cparam=1)
     else:
         clf, stdSlr=SVMClassifiers.trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linear')
 
 
     #For test set
     if useKernelInter:
+<<<<<<< HEAD
         predictedLabels2=SVMClassifiers.predictKernelIntersection(test_images_filenames,descriptor_type,clf2,stdSlr2,train_scaled,k,codebook)
+=======
+        predictedLabels2=SVMClassifiers.predictKernelIntersection(test_images_filenames,'SIFT',clf,stdSlr,train_scaled,k,codebook,Use_spatial_pyramid)
+>>>>>>> 5690e19225c6175c659085499fcf9e8d0c860715
         accuracy2 = Evaluation.computeAccuracyOld(predictedLabels2,test_labels)
         print 'Final Kernel intersection test accuracy: ' + str(accuracy2)
     else:
@@ -59,7 +65,11 @@ def launchsession2():
     validation_images_filenames,validation_labels=dataUtils.unzipTupleList(ValidationSplit)
     if useKernelInter:
         #Kernel intersection
+<<<<<<< HEAD
         predictedLabels2=SVMClassifiers.predictKernelIntersection(validation_images_filenames,descriptor_type,clf2,stdSlr2,train_scaled,k,codebook)
+=======
+        predictedLabels2=SVMClassifiers.predictKernelIntersection(validation_images_filenames,'SIFT',clf,stdSlr,train_scaled,k,codebook,Use_spatial_pyramid)
+>>>>>>> 5690e19225c6175c659085499fcf9e8d0c860715
         accuracy2 = Evaluation.computeAccuracyOld(predictedLabels2,validation_labels)
         print 'Final Kernel intersection validation accuracy: ' + str(accuracy2)
     else:
