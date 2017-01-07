@@ -8,17 +8,20 @@ import descriptors, SVMClassifiers, Evaluation, dataUtils,BoW
 def launchsession2():
     start = time.time()
     Use_spatial_pyramid = False
-    useKernelInter=False
+    useKernelInter = False
+    randomSplits = False
     # "SIFT", "SURF", "ORB", "HARRIS", "FAST", "STAR", "MSER", "DENSE"
-    descriptor_type="DENSE"
+    descriptor_type = "SIFT"
     
     # Read the train and test files
     train_images_filenames,test_images_filenames,train_labels,test_labels=dataUtils.readData()
     
     #Divide training into training and validation splits
     train_percentage=0.7#70% training 30%validation
-    TrainingSplit, ValidationSplit=dataUtils.getTrainingValidationSplit(train_images_filenames,train_labels,train_percentage)
-    TrainingSplit, ValidationSplit=dataUtils.getRandomTrainingValidationSplit(train_images_filenames,train_labels,train_percentage)
+    if randomSplits:
+        TrainingSplit, ValidationSplit=dataUtils.getRandomTrainingValidationSplit(train_images_filenames,train_labels,train_percentage)
+    else:
+        TrainingSplit, ValidationSplit=dataUtils.getTrainingValidationSplit(train_images_filenames,train_labels,train_percentage)
     
     #Get descriptors D
     if Use_spatial_pyramid:
@@ -27,19 +30,18 @@ def launchsession2():
         D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeatures(TrainingSplit, descriptor_type)
     
     #Computing bag of words using k-means and save codebook
-    k = 90
+    k = 512
     codebook=BoW.computeCodebook(D,k)
 
     #Determine visual words
     if Use_spatial_pyramid:
         visual_words = BoW.getVisualWordsSpatialPyramid(codebook, k, Train_descriptors, Train_image_size, Train_keypoints)
-    else:     
+    else:    
         visual_words = BoW.getVisualWords(codebook, k, Train_descriptors)
     
     # Train a linear SVM classifier
     if useKernelInter:
         #Kernel intersection
-        clf2, stdSlr2,train_scaled=SVMClassifiers.trainSVMKIntersection(visual_words,Train_label_per_descriptor,Cparam=1)
         clf, stdSlr,train_scaled=SVMClassifiers.trainSVMKIntersection(visual_words,Train_label_per_descriptor,Cparam=1)
     else:
         clf, stdSlr=SVMClassifiers.trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linear')
@@ -47,11 +49,7 @@ def launchsession2():
 
     #For test set
     if useKernelInter:
-<<<<<<< HEAD
-        predictedLabels2=SVMClassifiers.predictKernelIntersection(test_images_filenames,descriptor_type,clf2,stdSlr2,train_scaled,k,codebook)
-=======
-        predictedLabels2=SVMClassifiers.predictKernelIntersection(test_images_filenames,'SIFT',clf,stdSlr,train_scaled,k,codebook,Use_spatial_pyramid)
->>>>>>> 5690e19225c6175c659085499fcf9e8d0c860715
+        predictedLabels2=SVMClassifiers.predictKernelIntersection(test_images_filenames,descriptor_type,clf,stdSlr,train_scaled,k,codebook,Use_spatial_pyramid)
         accuracy2 = Evaluation.computeAccuracyOld(predictedLabels2,test_labels)
         print 'Final Kernel intersection test accuracy: ' + str(accuracy2)
     else:
@@ -65,11 +63,7 @@ def launchsession2():
     validation_images_filenames,validation_labels=dataUtils.unzipTupleList(ValidationSplit)
     if useKernelInter:
         #Kernel intersection
-<<<<<<< HEAD
-        predictedLabels2=SVMClassifiers.predictKernelIntersection(validation_images_filenames,descriptor_type,clf2,stdSlr2,train_scaled,k,codebook)
-=======
-        predictedLabels2=SVMClassifiers.predictKernelIntersection(validation_images_filenames,'SIFT',clf,stdSlr,train_scaled,k,codebook,Use_spatial_pyramid)
->>>>>>> 5690e19225c6175c659085499fcf9e8d0c860715
+        predictedLabels2=SVMClassifiers.predictKernelIntersection(validation_images_filenames,descriptor_type,clf,stdSlr,train_scaled,k,codebook,Use_spatial_pyramid)
         accuracy2 = Evaluation.computeAccuracyOld(predictedLabels2,validation_labels)
         print 'Final Kernel intersection validation accuracy: ' + str(accuracy2)
     else:

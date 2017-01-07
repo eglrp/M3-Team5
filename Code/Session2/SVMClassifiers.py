@@ -79,15 +79,7 @@ def getVisualWordsForImage(filename):
     k=data[1]
     descriptor_type=data[2]
     
-<<<<<<< HEAD
-    ima=cv2.imread(filename)
-    gray=cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
-    
-    detector=getattr(descriptors,'get'+descriptor_type+'Detector')()
-    kpt,des=descriptors.getKeyPointsDescriptors(detector,gray,descriptor_type)
-=======
     kpt,des=getKptDesForImage(filename,descriptor_type)
->>>>>>> 5690e19225c6175c659085499fcf9e8d0c860715
 
     #Predict the label for each descriptor
     words=codebook.predict(des)
@@ -120,15 +112,7 @@ def getPredictionForImageKIntersection(filename):
     k=data[4]
     codebook=data[5]
     
-<<<<<<< HEAD
-    ima=cv2.imread(filename)
-    gray=cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
-    
-    detector=getattr(descriptors,'get'+descriptor_type+'Detector')()
-    kpt,des=descriptors.getKeyPointsDescriptors(detector,gray,descriptor_type)
-=======
     kpt,des=getKptDesForImage(filename,descriptor_type)
->>>>>>> 5690e19225c6175c659085499fcf9e8d0c860715
     
     words=codebook.predict(des)
     test_visual_words=np.bincount(words,minlength=k)
@@ -164,7 +148,7 @@ def getPredictionForImageKIntersectionSpatialPyramid(filename):
     gray = cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
     
     detector = getattr(descriptors,'get'+descriptor_type+'Detector')()
-    kpt, des = descriptors.getKeyPointsDescriptors(detector,gray)
+    kpt, des = descriptors.getKeyPointsDescriptors(detector,gray,descriptor_type)
     coordinates_keypoints = [kp.pt for kp in kpt]
 
     test_visual_words = spt_py.spatial_pyramid(np.float32(gray.shape), des, coordinates_keypoints, codebook, k)
@@ -192,7 +176,7 @@ def getKptDesForImage(filename,descriptor_type):
     gray=cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
     
     detector=getattr(descriptors,'get'+descriptor_type+'Detector')()
-    kpt,des=descriptors.getKeyPointsDescriptors(detector,gray)
+    kpt,des=descriptors.getKeyPointsDescriptors(detector,gray,descriptor_type)
     
     return kpt,des
     
