@@ -79,4 +79,5 @@ if __name__ == '__main__':
     randomSplits = False
     # "SIFT", "SURF", "ORB", "HARRIS", "DENSE"
     descriptor_type = "SIFT"
+    print "Using %s detector, randomSplits=%s, Use_spatial_pyramid=%s, useKernelInter=%s" % (descriptor_type,randomSplits,Use_spatial_pyramid,useKernelInter)
     launchsession2(num_slots,descriptor_type,randomSplits,Use_spatial_pyramid,useKernelInter)
