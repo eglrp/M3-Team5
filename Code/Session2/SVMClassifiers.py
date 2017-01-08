@@ -31,12 +31,12 @@ def trainSVMKIntersection(visual_words,Train_label_per_descriptor,Cparam=1):
     print 'Done!'
     return clf,stdSlr,D_scaled
 
-def predict(test_images_filenames,descriptor_type,stdSlr, codebook,k, Use_spatial_pyramid):
+def predict(test_images_filenames,descriptor_type,stdSlr, codebook,k, Use_spatial_pyramid,num_slots):
     #Predict test set labels with the trained classifier
     data = [codebook,k,descriptor_type]#shared data with processes
     
     
-    pool = Pool(processes=4,initializer=initPool, initargs=[data])
+    pool = Pool(processes=num_slots,initializer=initPool, initargs=[data])
     if Use_spatial_pyramid:
 #        visual_words_test=np.zeros((len(test_images_filenames), 21*k),dtype=np.float32)
         visual_words_test = pool.map(getVisualWordsForImageSpatialPyramid, test_images_filenames)
@@ -58,11 +58,11 @@ def predict(test_images_filenames,descriptor_type,stdSlr, codebook,k, Use_spatia
     #return predictions
     return predictedLabels
     
-def predictKernelIntersection(test_images_filenames,descriptor_type,clf,stdSlr,train_scaled,k,codebook,Use_spatial_pyramid):
+def predictKernelIntersection(test_images_filenames,descriptor_type,clf,stdSlr,train_scaled,k,codebook,Use_spatial_pyramid,num_slots):
     #Predict test set labels with the trained classifier
     data = [train_scaled,clf,stdSlr,descriptor_type,k,codebook]#shared data with processes
     
-    pool = Pool(processes=4,initializer=initPool, initargs=[data])
+    pool = Pool(processes=num_slots,initializer=initPool, initargs=[data])
     if Use_spatial_pyramid:
         predictedClasses= pool.map(getPredictionForImageKIntersectionSpatialPyramid, test_images_filenames)
     else:

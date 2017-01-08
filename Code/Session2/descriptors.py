@@ -59,10 +59,10 @@ def getKeyPointsDescriptors(detector,image,descriptor_type):
     return kpt,des
 
 #Extract features methods
-def extractFeatures(FLSubset, descriptor_type):
+def extractFeatures(FLSubset, descriptor_type, num_slots):
     data=descriptor_type
     
-    pool = Pool(processes=4,initializer=initPool, initargs=[data])
+    pool = Pool(processes=num_slots,initializer=initPool, initargs=[data])
     deslab = pool.map(getDescriptorsAndLabelsForImage, FLSubset)
     pool.terminate()
 
@@ -79,10 +79,10 @@ def extractFeatures(FLSubset, descriptor_type):
     
     return D,Train_descriptors,Train_label_per_descriptor#,L
     
-def extractFeaturesPyramid(FLSubset, descriptor_type):
+def extractFeaturesPyramid(FLSubset, descriptor_type,num_slots):
     data=descriptor_type
     
-    pool = Pool(processes=4,initializer=initPool, initargs=[data])
+    pool = Pool(processes=num_slots,initializer=initPool, initargs=[data])
     deslab = pool.map(getDescriptorsAndLabelsForImage, FLSubset)
     pool.terminate()
 
