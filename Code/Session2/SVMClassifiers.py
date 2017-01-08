@@ -7,23 +7,23 @@ import descriptors
 import spatial_pyramid as spt_py
 import kernelIntersection
 
-def trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linear',degree_value=1,gamma_value=0.01,weight = 'balanced'):
+def trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linear',degree_value=1,gamma_value=0.01,weight = 'balanced',probabilities = True):
     # Train a SVM classifier
     stdSlr = StandardScaler().fit(visual_words)
     D_scaled = stdSlr.transform(visual_words)
     print 'Training the SVM classifier...'
-    clf = svm.SVC(kernel=kernel_type, C=Cparam,degree=degree_value,gamma=gamma_value,class_weight=weight).fit(D_scaled, Train_label_per_descriptor)
+    clf = svm.SVC(kernel=kernel_type, C=Cparam,degree=degree_value,gamma=gamma_value,class_weight=weight,probability = probabilities).fit(D_scaled, Train_label_per_descriptor)
     print 'Done!'
 
     return clf,stdSlr
  
-def trainSVMKIntersection(visual_words,Train_label_per_descriptor,Cparam=1):
+def trainSVMKIntersection(visual_words,Train_label_per_descriptor,Cparam=1,probabilities = True):
     # Train a SVM classifier
     stdSlr = StandardScaler().fit(visual_words)
     D_scaled = stdSlr.transform(visual_words)
     kernelMatrix =kernelIntersection.histogramIntersection(D_scaled,D_scaled)
     print 'Training the SVM classifier...'
-    clf = svm.SVC(kernel='precomputed', C=Cparam)
+    clf = svm.SVC(kernel='precomputed', C=Cparam,probability=probabilities)
     #temp = kernelMatrix.reshape(1,-1)
     temp=np.tile(kernelMatrix, (len(kernelMatrix), 1))
     #clf.fit(kernelMatrix, Train_label_per_descriptor)

@@ -3,9 +3,10 @@ import sys
 sys.path.append('.')
 
 import time
-import descriptors, SVMClassifiers, Evaluation, dataUtils,BoW
+import descriptors, SVMClassifiers, Evaluation, dataUtils,BoW,graphs
+import matplotlib.pyplot as plt
 
-def launchsession2(num_slots,descriptor_type,randomSplits,Use_spatial_pyramid,useKernelInter):
+def launchsession2(num_slots,descriptor_type,randomSplits,Use_spatial_pyramid,useKernelInter,rocCurveCM):
     start = time.time()
     
     # Read the train and test files
@@ -25,7 +26,7 @@ def launchsession2(num_slots,descriptor_type,randomSplits,Use_spatial_pyramid,us
         D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeatures(TrainingSplit, descriptor_type,num_slots)
     
     #Computing bag of words using k-means and save codebook
-    k = 512
+    k = 1500
     codebook=BoW.computeCodebook(D,k)
 
     #Determine visual words
@@ -67,6 +68,10 @@ def launchsession2(num_slots,descriptor_type,randomSplits,Use_spatial_pyramid,us
         #Compute accuracy
         validation_accuracy = Evaluation.getMeanAccuracy(clf,predictedLabels,validation_labels)
         print 'Final validation accuracy: ' + str(validation_accuracy)
+    #Roc curve and Confusion Matrix
+    if rocCurveCM:
+        graphs.rcurve(predictedLabels,validation_labels,clf)
+        graphs.plot_confusion_matrix(clf,validation_labels,stdSlr.transform(predictedLabels),normalize=False,title='Confusion matrix',cmap=plt.cm.Blues)
     
     end=time.time()
     print 'Done in '+str(end-start)+' secs.'
@@ -76,8 +81,9 @@ if __name__ == '__main__':
     num_slots=4
     Use_spatial_pyramid = False
     useKernelInter = False
-    randomSplits = False
+    randomSplits = True
+    rocCurveCM = True
     # "SIFT", "SURF", "ORB", "HARRIS", "DENSE"
-    descriptor_type = "SIFT"
+    descriptor_type = "DENSE"
     print "Using %s detector, randomSplits=%s, Use_spatial_pyramid=%s, useKernelInter=%s" % (descriptor_type,randomSplits,Use_spatial_pyramid,useKernelInter)
-    launchsession2(num_slots,descriptor_type,randomSplits,Use_spatial_pyramid,useKernelInter)
+    launchsession2(num_slots,descriptor_type,randomSplits,Use_spatial_pyramid,useKernelInter,rocCurveCM)
