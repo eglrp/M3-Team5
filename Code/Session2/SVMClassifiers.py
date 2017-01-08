@@ -7,7 +7,7 @@ import descriptors
 import spatial_pyramid as spt_py
 import kernelIntersection
 
-def trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linear',degree_value=1,gamma_value=0.01,weight = 'balanced',probabilities = True):
+def trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linear',degree_value=1,gamma_value=0.01,weight = 'balanced',probabilities=False):
     # Train a SVM classifier
     stdSlr = StandardScaler().fit(visual_words)
     D_scaled = stdSlr.transform(visual_words)
@@ -17,7 +17,7 @@ def trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linea
 
     return clf,stdSlr
  
-def trainSVMKIntersection(visual_words,Train_label_per_descriptor,Cparam=1,probabilities = True):
+def trainSVMKIntersection(visual_words,Train_label_per_descriptor,Cparam=1,probabilities=False):
     # Train a SVM classifier
     stdSlr = StandardScaler().fit(visual_words)
     D_scaled = stdSlr.transform(visual_words)

@@ -26,7 +26,7 @@ def launchsession2(num_slots,descriptor_type,randomSplits,Use_spatial_pyramid,us
         D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeatures(TrainingSplit, descriptor_type,num_slots)
     
     #Computing bag of words using k-means and save codebook
-    k = 1500
+    k = 512
     codebook=BoW.computeCodebook(D,k)
 
     #Determine visual words
@@ -38,9 +38,9 @@ def launchsession2(num_slots,descriptor_type,randomSplits,Use_spatial_pyramid,us
     # Train a linear SVM classifier
     if useKernelInter:
         #Kernel intersection
-        clf, stdSlr,train_scaled=SVMClassifiers.trainSVMKIntersection(visual_words,Train_label_per_descriptor,Cparam=1)
+        clf, stdSlr,train_scaled=SVMClassifiers.trainSVMKIntersection(visual_words,Train_label_per_descriptor,Cparam=1,probabilities=rocCurveCM)
     else:
-        clf, stdSlr=SVMClassifiers.trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linear')
+        clf, stdSlr=SVMClassifiers.trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linear',probabilities=rocCurveCM)
 
 
     #For test set
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     Use_spatial_pyramid = False
     useKernelInter = False
     randomSplits = True
-    rocCurveCM = True
+    rocCurveCM = False
     # "SIFT", "SURF", "ORB", "HARRIS", "DENSE"
     descriptor_type = "DENSE"
     print "Using %s detector, randomSplits=%s, Use_spatial_pyramid=%s, useKernelInter=%s" % (descriptor_type,randomSplits,Use_spatial_pyramid,useKernelInter)
