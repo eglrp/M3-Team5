@@ -36,49 +36,26 @@ def getHARRISDetector():
 #    return detector    
 
 def getDENSEDetector():
-#    detector=cv2.DenseFeatureDetector(initFeatureScale=30, featureScaleLevels=1,
-#                          featureScaleMul=1,
-#                          initXyStep=10, initImgBound=10,
-#                          varyXyStepWithScale=0,
-#                          varyImgBoundWithScale=0)
-    detector = cv2.FeatureDetector_create("DENSE")
-    detector.setInt("initXyStep",10)
-    detector.setInt("initFeatureScale",30)
-    detector.setInt("initImgBound",10)
-
-#    detector = cv2.FeatureDetector_create("DENSE")
-#    detector.setInt("initXyStep",10)
-#    detector.setInt("initFeatureScale",30)
-#    detector.setInt("initImgBound",10)
     detector = None
     
     return detector
-    
 
-    
 def getKeyPointsDescriptors(detector,image,descriptor_type):
     #Descriptors
     if descriptor_type == 'SIFT' :
         kpt,des=detector.detectAndCompute(image,None)
     elif descriptor_type=='DENSE':
-        
         sift=getSIFTDetector()
-        kp1 = np.zeros((image.shape[0]*image.shape[1])/100)
-        k=0
-        for x in xrange(int(0,image.shape[0],10)):
-            for y in xrange(int(0,image.shape[1],10)):
-                kp1[k] = cv2.KeyPoint([x,y,np.random.randint(10, 30)])   
-                k=k+1
-                print(k)
+        kp1 =list()
+        for x in range(0,image.shape[0],10):
+            for y in range(0,image.shape[1],10):
+                kp1.append(cv2.KeyPoint(x,y,np.random.randint(10, 30)))
+        kp1=np.array(kp1)
         kpt,des=sift.compute(image,kp1)
-       
     else:
         sift=getSIFTDetector()
         kp1=detector.detect(image,None)
         kpt,des=sift.compute(image,kp1)
-        if descriptor_type == 'SURF':
-            kpt=kpt[0:100]
-            des=des[0:100,:]
     return kpt,des
 
 #Extract features methods
