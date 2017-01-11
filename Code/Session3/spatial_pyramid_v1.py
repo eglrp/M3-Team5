@@ -1,46 +1,26 @@
 
 import numpy as np
-import itertools
+
 #Given an image and its descriptors, compute the spatial pyramid dividing 
 #the image in 4 parts
-def spatial_pyramid(size_image, descriptors, coordinates_keypoints, codebook, k, levels_pyramid):
+def spatial_pyramid(size_image, descriptors, keypoints, codebook, k):
     
+    alpha_0 = 1.0/2
+    alpha_1 = 1.0/4
+    alpha_2 = 1.0/4
         
-#    limits_whole_image = [[0, 0], [size_image[0] - 1, size_image[1] - 1]]
-    num_grids = sum([levels_pyramid[i][0]*levels_pyramid[i][1] for i in range(len(levels_pyramid))]) + 1
-    visual_words_full = np.zeros((1, num_grids*k), dtype = np.float32)
+    limits_whole_image = [[0, 0], [size_image[0], size_image[1]]]
     
+    visual_words_full = np.zeros((1, 21*k), dtype = np.float32)
     
     #First, we compute the histogram for the whole image
     words = codebook.predict(descriptors)
 
-    visual_words_full[0, 0:k] = np.bincount(words, minlength = k)
+    visual_words_full[0, 0:k] = np.bincount(words, minlength = k)*alpha_2
     
-    for i in range(len(levels_pyramid)):
-        #For each level of the pyramid, we divide the image in the specified parts    
-        grid = levels_pyramid[i]
-        X = np.floor(np.linspace(0, size_image[0] - 1, num = grid[0]))
-        Y = np.floor(np.linspace(0, size_image[1] - 1, num = grid[1]))
-        
-        up_corner = list(itertools.product(X[:-1], Y[:-1]))
-        down_corner = list(itertools.product(X[1:], Y[1:]))
-        
-        descriptors_subimages = [[] for j in range(len(up_corner))]
-                                 
-        for k in range(len(coordinates_keypoints)):
-            #For each descrptor, determine the subimage it belongs to                      
-            for j in range(len(up_corner)):
-                x = coordinates_keypoints[k][0]
-                y = coordinates_keypoints[k][1]
-                
-                if x > up_corner[j][0] and y > up_corner[j][1] and x < down_corner[j][0] and y < down_corner[j][1]:
-                    descriptors_subimages[j].append(descriptors[k])
-                    break
-      ##Continue here 
-        words = codebook.predict(np.array(descriptors_subimage00))
-        visual_words[0, 0:k] =  np.bincount(words, minlength = k)
+    #Second, we compute the histogram for the 4x4 subimages
     
-    visual_words_sub = words_subimages_4x4(limits_whole_image, descriptors, keypoints, codebook, k)
+    visual_words_4x4 = words_subimages_4x4(limits_whole_image, descriptors, keypoints, codebook, k, alpha_1)
     
     visual_words_full[0, k:5*k ] = visual_words_4x4
     
@@ -58,9 +38,6 @@ def spatial_pyramid(size_image, descriptors, coordinates_keypoints, codebook, k,
     return visual_words_full  
 
 
-
-    
-    
 def words_subimages_4x4(limits_image, descriptors, coordinates_keypoints, codebook, k, alpha):   
     #limits_image contains the upper left and the down right corner of the image
 
