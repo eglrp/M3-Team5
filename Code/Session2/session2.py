@@ -3,9 +3,10 @@ import sys
 sys.path.append('.')
 
 import time
-import descriptors, SVMClassifiers, Evaluation, dataUtils,BoW,graphs
-import matplotlib.pyplot as plt
-
+import descriptors, SVMClassifiers, Evaluation, dataUtils,BoW
+#import graphs
+#import matplotlib.pyplot as plt
+import numpy as np
 def launchsession2(num_slots,descriptor_type,randomSplits,Use_spatial_pyramid,useKernelInter,rocCurveCM):
     start = time.time()
     
@@ -83,7 +84,8 @@ if __name__ == '__main__':
     useKernelInter = False
     randomSplits = True
     rocCurveCM = False
+    print np.version.version
     # "SIFT", "SURF", "ORB", "HARRIS", "DENSE"
-    descriptor_type = "DENSE"
+    descriptor_type = "SIFT"
     print "Using %s detector, randomSplits=%s, Use_spatial_pyramid=%s, useKernelInter=%s" % (descriptor_type,randomSplits,Use_spatial_pyramid,useKernelInter)
     launchsession2(num_slots,descriptor_type,randomSplits,Use_spatial_pyramid,useKernelInter,rocCurveCM)
