@@ -7,7 +7,7 @@ Created on Sun Jan 08 01:57:51 2017
 
 import itertools
 import numpy as np
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
 from sklearn import metrics
 

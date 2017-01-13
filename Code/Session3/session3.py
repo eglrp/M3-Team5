@@ -1,97 +1,79 @@
-import cv2
-import numpy as np
-import cPickle
+#!/bin/env python
+import sys
+sys.path.append('.')
+
 import time
-from sklearn.preprocessing import StandardScaler
-from sklearn import svm
-from sklearn import cluster
-from yael import ynumpy
+import descriptors, SVMClassifiers, Evaluation, dataUtils,fisherVectors
 
-start = time.time()
+def launchsession3(num_slots,descriptor_type,randomSplits,levels_pyramid,useKernelInter):
+    start = time.time()
+    
+    # Read the train and test files
+    train_images_filenames,test_images_filenames,train_labels,test_labels=dataUtils.readData()
+    
+    #Divide training into training and validation splits
+    train_percentage=0.7#70% training 30%validation
+    if randomSplits:
+        TrainingSplit, ValidationSplit=dataUtils.getRandomTrainingValidationSplit(train_images_filenames,train_labels,train_percentage)
+    else:
+        TrainingSplit, ValidationSplit=dataUtils.getTrainingValidationSplit(train_images_filenames,train_labels,train_percentage)
+    
+    #Get descriptors D
+    if levels_pyramid>0:
+        D, Train_descriptors, Train_label_per_descriptor, Train_keypoints, Train_image_size = descriptors.extractFeaturesPyramid(TrainingSplit,descriptor_type,num_slots)
+    else:
+        D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeatures(TrainingSplit, descriptor_type,num_slots)
+    
+    #Computing gmm
+    k = 32
+    
+    gmm=fisherVectors.getGMM(D,k)
+    fisher=fisherVectors.getFisherVectors(Train_descriptors,k,gmm)
+    
+    # Train a linear SVM classifier
+    if useKernelInter:
+        #Kernel intersection
+        clf, stdSlr,train_scaled=SVMClassifiers.trainSVMKIntersection(fisher,Train_label_per_descriptor,Cparam=1)
+    else:
+        clf, stdSlr=SVMClassifiers.trainSVM(fisher,Train_label_per_descriptor,Cparam=1,kernel_type='linear')
+    
+    #For test set
+    if useKernelInter:
+        predictedLabels2=SVMClassifiers.predictKernelIntersection(test_images_filenames,descriptor_type,clf,stdSlr,train_scaled,gmm,k,levels_pyramid,num_slots)
+        accuracy2 = Evaluation.computeAccuracyOld(predictedLabels2,test_labels)
+        print 'Final Kernel intersection test accuracy: ' + str(accuracy2)
+    else:
+        # Get all the test data and predict their labels
+        predictedLabels=SVMClassifiers.predict(test_images_filenames,descriptor_type,stdSlr,gmm, k, levels_pyramid,num_slots)
+        #Compute accuracy
+        accuracy = Evaluation.getMeanAccuracy(clf,predictedLabels,test_labels)
+        print 'Final test accuracy: ' + str(accuracy)
 
-# read the train and test files
-
-train_images_filenames = cPickle.load(open('train_images_filenames.dat','r'))
-test_images_filenames = cPickle.load(open('test_images_filenames.dat','r'))
-train_labels = cPickle.load(open('train_labels.dat','r'))
-test_labels = cPickle.load(open('test_labels.dat','r'))
-
-print 'Loaded '+str(len(train_images_filenames))+' training images filenames with classes ',set(train_labels)
-print 'Loaded '+str(len(test_images_filenames))+' testing images filenames with classes ',set(test_labels)
-
-# create the SIFT detector object
-
-SIFTdetector = cv2.SIFT(nfeatures=100)
-
-# extract SIFT keypoints and descriptors
-# store descriptors in a python list of numpy arrays
-
-Train_descriptors = []
-Train_label_per_descriptor = []
-
-for i in range(len(train_images_filenames)):
-	filename=train_images_filenames[i]
-	print 'Reading image '+filename
-	ima=cv2.imread(filename)
-	gray=cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
-	kpt,des=SIFTdetector.detectAndCompute(gray,None)
-	Train_descriptors.append(des)
-	Train_label_per_descriptor.append(train_labels[i])
-	print str(len(kpt))+' extracted keypoints and descriptors'
-
-# Transform everything to numpy arrays
-size_descriptors=Train_descriptors[0].shape[1]
-D=np.zeros((np.sum([len(p) for p in Train_descriptors]),size_descriptors),dtype=np.uint8)
-startingpoint=0
-for i in range(len(Train_descriptors)):
-	D[startingpoint:startingpoint+len(Train_descriptors[i])]=Train_descriptors[i]
-	startingpoint+=len(Train_descriptors[i])
-
-
-k = 32
-
-print 'Computing gmm with '+str(k)+' centroids'
-init=time.time()
-gmm = ynumpy.gmm_learn(np.float32(D), k)
-end=time.time()
-print 'Done in '+str(end-init)+' secs.'
-
-
-
-init=time.time()
-fisher=np.zeros((len(Train_descriptors),k*128*2),dtype=np.float32)
-for i in xrange(len(Train_descriptors)):
-	fisher[i,:]= ynumpy.fisher(gmm, Train_descriptors[i], include = ['mu','sigma'])
-
-
-end=time.time()
-print 'Done in '+str(end-init)+' secs.'
-
-
-# Train a linear SVM classifier
-
-stdSlr = StandardScaler().fit(fisher)
-D_scaled = stdSlr.transform(fisher)
-print 'Training the SVM classifier...'
-clf = svm.SVC(kernel='linear', C=1).fit(D_scaled, train_labels)
-print 'Done!'
-
-# get all the test data and predict their labels
-fisher_test=np.zeros((len(test_images_filenames),k*128*2),dtype=np.float32)
-for i in range(len(test_images_filenames)):
-	filename=test_images_filenames[i]
-	print 'Reading image '+filename
-	ima=cv2.imread(filename)
-	gray=cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
-	kpt,des=SIFTdetector.detectAndCompute(gray,None)
-	fisher_test[i,:]=ynumpy.fisher(gmm, des, include = ['mu','sigma'])
-
-
-accuracy = 100*clf.score(stdSlr.transform(fisher_test), test_labels)
-
-print 'Final accuracy: ' + str(accuracy)
-
-end=time.time()
-print 'Done in '+str(end-start)+' secs.'
-
-## 61.71% in 251 secs.
+    #For validation set
+    validation_images_filenames,validation_labels=dataUtils.unzipTupleList(ValidationSplit)
+    if useKernelInter:
+        #Kernel intersection
+        predictedLabels2=SVMClassifiers.predictKernelIntersection(validation_images_filenames,descriptor_type,clf,stdSlr,train_scaled,gmm,k,levels_pyramid,num_slots)
+        accuracy2 = Evaluation.computeAccuracyOld(predictedLabels2,validation_labels)
+        print 'Final Kernel intersection validation accuracy: ' + str(accuracy2)
+    else:
+        # Get all the test data and predict their labels
+        predictedLabels=SVMClassifiers.predict(validation_images_filenames,descriptor_type,stdSlr, gmm, k, levels_pyramid,num_slots)
+        #Compute accuracy
+        validation_accuracy = Evaluation.getMeanAccuracy(clf,predictedLabels,validation_labels)
+        print 'Final validation accuracy: ' + str(validation_accuracy)
+    
+    end=time.time()
+    print 'Done in '+str(end-start)+' secs.'
+    
+    ## 61.71% in 251 secs.
+    
+if __name__ == '__main__':
+    num_slots=4
+    levels_pyramid = 0
+    useKernelInter = False
+    randomSplits = True
+    # "SIFT", "SURF", "ORB", "HARRIS", "DENSE"
+    descriptor_type = "SIFT"
+    print "Using %s detector, randomSplits=%s, levels_pyramid=%s, useKernelInter=%s" % (descriptor_type,randomSplits,levels_pyramid,useKernelInter)
+    launchsession3(num_slots,descriptor_type,randomSplits,levels_pyramid,useKernelInter)
