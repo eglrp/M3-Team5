@@ -27,12 +27,12 @@ def getVisualWords(codebook,k,Train_descriptors):
     print 'Done in '+str(end-init)+' secs.'
     return visual_words
     
-def getVisualWordsSpatialPyramid(codebook, k, Train_descriptors, Train_image_size, Train_keypoints):
+def getVisualWordsSpatialPyramid(codebook, k, Train_descriptors, Train_image_size, Train_keypoints, Use_spatial_pyramid):
     print 'Computing visual words'
     init=time.time()
     visual_words=np.zeros((len(Train_descriptors),21*k),dtype=np.float32)
     for i in xrange(len(Train_descriptors)):
-        visual_words[i, :] = spt_py.spatial_pyramid(Train_image_size[i], Train_descriptors[i], Train_keypoints[i], codebook, k)
+        visual_words[i, :] = spt_py.spatial_pyramid(Train_image_size[i], Train_descriptors[i], Train_keypoints[i], codebook, k, Use_spatial_pyramid)
     
     end=time.time()
     print 'Done in '+str(end-init)+' secs.'

@@ -31,8 +31,8 @@ def launchsession2(num_slots,descriptor_type,randomSplits,Use_spatial_pyramid,us
     codebook=BoW.computeCodebook(D,k)
 
     #Determine visual words
-    if Use_spatial_pyramid:
-        visual_words = BoW.getVisualWordsSpatialPyramid(codebook, k, Train_descriptors, Train_image_size, Train_keypoints)
+    if Use_spatial_pyramid != 0:
+        visual_words = BoW.getVisualWordsSpatialPyramid(codebook, k, Train_descriptors, Train_image_size, Train_keypoints, Use_spatial_pyramid)
     else:    
         visual_words = BoW.getVisualWords(codebook, k, Train_descriptors)
     
@@ -70,22 +70,23 @@ def launchsession2(num_slots,descriptor_type,randomSplits,Use_spatial_pyramid,us
         validation_accuracy = Evaluation.getMeanAccuracy(clf,predictedLabels,validation_labels)
         print 'Final validation accuracy: ' + str(validation_accuracy)
     #Roc curve and Confusion Matrix
-    if rocCurveCM:
-        graphs.rcurve(predictedLabels,validation_labels,clf)
-        graphs.plot_confusion_matrix(clf,validation_labels,stdSlr.transform(predictedLabels),normalize=False,title='Confusion matrix',cmap=plt.cm.Blues)
+#    if rocCurveCM:
+#        graphs.rcurve(predictedLabels,validation_labels,clf)
+#        graphs.plot_confusion_matrix(clf,validation_labels,stdSlr.transform(predictedLabels),normalize=False,title='Confusion matrix',cmap=plt.cm.Blues)
     
     end=time.time()
     print 'Done in '+str(end-start)+' secs.'
 
 
 if __name__ == '__main__':
-    num_slots=4
-    Use_spatial_pyramid = False
+    num_slots=2
+    Use_spatial_pyramid = [[2,2], [4,4]]
+#    Use_spatial_pyramid = 0
     useKernelInter = False
     randomSplits = True
     rocCurveCM = False
-    print np.version.version
+    
     # "SIFT", "SURF", "ORB", "HARRIS", "DENSE"
-    descriptor_type = "SIFT"
+    descriptor_type = "DENSE"
     print "Using %s detector, randomSplits=%s, Use_spatial_pyramid=%s, useKernelInter=%s" % (descriptor_type,randomSplits,Use_spatial_pyramid,useKernelInter)
     launchsession2(num_slots,descriptor_type,randomSplits,Use_spatial_pyramid,useKernelInter,rocCurveCM)

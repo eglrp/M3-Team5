@@ -31,13 +31,13 @@ def trainSVMKIntersection(visual_words,Train_label_per_descriptor,Cparam=1,proba
     print 'Done!'
     return clf,stdSlr,D_scaled
 
-def predict(test_images_filenames,descriptor_type,stdSlr, codebook,k, Use_spatial_pyramid,num_slots):
+def predict(test_images_filenames,descriptor_type,stdSlr, codebook,k, Use_spatial_pyramid, num_slots):
     #Predict test set labels with the trained classifier
-    data = [codebook,k,descriptor_type]#shared data with processes
+    data = [codebook,k,descriptor_type, Use_spatial_pyramid]#shared data with processes
     
     
     pool = Pool(processes=num_slots,initializer=initPool, initargs=[data])
-    if Use_spatial_pyramid:
+    if Use_spatial_pyramid != 0:
 #        visual_words_test=np.zeros((len(test_images_filenames), 21*k),dtype=np.float32)
         visual_words_test = pool.map(getVisualWordsForImageSpatialPyramid, test_images_filenames)
         
@@ -91,6 +91,7 @@ def getVisualWordsForImageSpatialPyramid(filename):
     codebook = data[0]
     k = data[1]
     descriptor_type = data[2]
+    Use_spatial_pyramid = data[3]
     
     ima = cv2.imread(filename)
     gray = cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
@@ -100,7 +101,7 @@ def getVisualWordsForImageSpatialPyramid(filename):
     coordinates_keypoints = [kp.pt for kp in kpt]
     
     #Compute spatial pyramid
-    visual_words = spt_py.spatial_pyramid(np.float32(gray.shape), des, coordinates_keypoints, codebook, k)
+    visual_words = spt_py.spatial_pyramid(np.float32(gray.shape), des, coordinates_keypoints, codebook, k, Use_spatial_pyramid)
     
     return visual_words
     
