@@ -52,7 +52,7 @@ def spatial_pyramid(size_image, descriptors, coordinates_keypoints, codebook, k,
                           
     return visual_words_full  
 
-
-
-    
-    
+def spatial_pyramid_fisher(size_image, descriptors, coordinates_keypoints, k, gmm, levels_pyramid):
+    #TODO
+    fisher=None
+    return fisher
