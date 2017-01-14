@@ -143,15 +143,13 @@ def getPredictionForImageKIntersectionSpatialPyramid(filename):
     coordinates_keypoints = [kp.pt for kp in kpt]
 
     test_visual_words = spt_py.spatial_pyramid(np.float32(gray.shape), des, coordinates_keypoints, codebook, k)
-    
+
     test_scaled=computedstdSlr.transform(test_visual_words)
+    test_scaled=test_scaled.reshape(1,-1)
     
     #Predict the label for each descriptor
     predictMatrix = kernelIntersection.histogramIntersection(test_scaled, train_scaled)
-    
-    temp=np.tile(predictMatrix, (len(train_scaled), 1))
-    
-    SVMpredictions = computedClf.predict(temp)
+    SVMpredictions = computedClf.predict(predictMatrix)
     
     values, counts = np.unique(SVMpredictions, return_counts=True)
     predictedClass = values[np.argmax(counts)]

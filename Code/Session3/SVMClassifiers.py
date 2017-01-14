@@ -24,10 +24,7 @@ def trainSVMKIntersection(fisher,train_labels,Cparam=1):
     kernelMatrix =kernelIntersection.histogramIntersection(D_scaled,D_scaled)
     print 'Training the SVM classifier...'
     clf = svm.SVC(kernel='precomputed', C=Cparam)
-    #temp = kernelMatrix.reshape(1,-1)
-    temp=np.tile(kernelMatrix, (len(kernelMatrix), 1))
-    #clf.fit(kernelMatrix, Train_label_per_descriptor)
-    clf.fit(temp, train_labels)
+    clf.fit(kernelMatrix, train_labels)
     print 'Done!'
     return clf,stdSlr,D_scaled
 
@@ -100,16 +97,10 @@ def getPredictionForImageKIntersection(filename):
     kpt,des=getKptDesForImage(filename,descriptor_type)
     fisher_test=ynumpy.fisher(gmm, des, include = ['mu','sigma'])
     test_scaled=computedstdSlr.transform(fisher_test)
+    test_scaled=test_scaled.reshape(1,-1)
     
-    #TODO:change below
-    tem=test_scaled.reshape(1,-1)
-    temp=np.tile(tem, (len(train_scaled), 1))
-    
-    predictMatrix = kernelIntersection.histogramIntersection(temp, train_scaled)
-
-    temp=np.tile(predictMatrix, (len(train_scaled), 1))
-    
-    SVMpredictions = computedClf.predict(temp)
+    predictMatrix = kernelIntersection.histogramIntersection(test_scaled, train_scaled)
+    SVMpredictions = computedClf.predict(predictMatrix)
     
     values, counts = np.unique(SVMpredictions, return_counts=True)
     predictedClass = values[np.argmax(counts)]
@@ -134,17 +125,11 @@ def getPredictionForImageKIntersectionSpatialPyramid(filename):
 
     fisher_test = spt_py.spatial_pyramid_fisher(np.float32(gray.shape), des, coordinates_keypoints, k, gmm, levels_pyramid)
     
-    #TODO:change below
     test_scaled=computedstdSlr.transform(fisher_test)
-    tem=test_scaled.reshape(1,-1)
-    temp=np.tile(tem, (len(train_scaled), 1))
+    test_scaled=test_scaled.reshape(1,-1)
     
-    #Predict the label for each descriptor
-    predictMatrix = kernelIntersection.histogramIntersection(temp, train_scaled)
-
-    temp=np.tile(predictMatrix, (len(train_scaled), 1))
-    
-    SVMpredictions = computedClf.predict(temp)
+    predictMatrix = kernelIntersection.histogramIntersection(test_scaled, train_scaled)
+    SVMpredictions = computedClf.predict(predictMatrix)
     
     values, counts = np.unique(SVMpredictions, return_counts=True)
     predictedClass = values[np.argmax(counts)]
