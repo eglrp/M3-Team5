@@ -24,10 +24,7 @@ def trainSVMKIntersection(visual_words,Train_label_per_descriptor,Cparam=1,proba
     kernelMatrix =kernelIntersection.histogramIntersection(D_scaled,D_scaled)
     print 'Training the SVM classifier...'
     clf = svm.SVC(kernel='precomputed', C=Cparam,probability=probabilities)
-    #temp = kernelMatrix.reshape(1,-1)
-    temp=np.tile(kernelMatrix, (len(kernelMatrix), 1))
-    #clf.fit(kernelMatrix, Train_label_per_descriptor)
-    clf.fit(temp, Train_label_per_descriptor)
+    clf.fit(kernelMatrix, Train_label_per_descriptor)
     print 'Done!'
     return clf,stdSlr,D_scaled
 
@@ -119,18 +116,11 @@ def getPredictionForImageKIntersection(filename):
     test_visual_words=np.bincount(words,minlength=k)
     
     test_scaled=computedstdSlr.transform(test_visual_words)
-    tem=test_scaled.reshape(1,-1)
-    temp=np.tile(tem, (len(train_scaled), 1))
-    
+    test_scaled=test_scaled.reshape(1,-1)
     
     #Predict the label for each descriptor
-    #predictMatrix = kernelIntersection.histogramIntersection(test_scaled, train_scaled)
-    predictMatrix = kernelIntersection.histogramIntersection(temp, train_scaled)
-
-    
-    temp=np.tile(predictMatrix, (len(train_scaled), 1))
-    
-    SVMpredictions = computedClf.predict(temp)
+    predictMatrix = kernelIntersection.histogramIntersection(test_scaled, train_scaled)
+    SVMpredictions = computedClf.predict(predictMatrix)
     
     values, counts = np.unique(SVMpredictions, return_counts=True)
     predictedClass = values[np.argmax(counts)]
@@ -155,13 +145,9 @@ def getPredictionForImageKIntersectionSpatialPyramid(filename):
     test_visual_words = spt_py.spatial_pyramid(np.float32(gray.shape), des, coordinates_keypoints, codebook, k)
     
     test_scaled=computedstdSlr.transform(test_visual_words)
-    tem=test_scaled.reshape(1,-1)
-    temp=np.tile(tem, (len(train_scaled), 1))
-    
     
     #Predict the label for each descriptor
-    predictMatrix = kernelIntersection.histogramIntersection(temp, train_scaled)
-
+    predictMatrix = kernelIntersection.histogramIntersection(test_scaled, train_scaled)
     
     temp=np.tile(predictMatrix, (len(train_scaled), 1))
     

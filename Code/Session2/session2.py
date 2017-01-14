@@ -3,10 +3,8 @@ import sys
 sys.path.append('.')
 
 import time
-import descriptors, SVMClassifiers, Evaluation, dataUtils,BoW
-import graphs
+import descriptors, SVMClassifiers, Evaluation, dataUtils,BoW,graphs
 import matplotlib.pyplot as plt
-import numpy as np
 def launchsession2(num_slots,descriptor_type,randomSplits,Use_spatial_pyramid,useKernelInter,rocCurveCM):
     start = time.time()
     
@@ -21,7 +19,7 @@ def launchsession2(num_slots,descriptor_type,randomSplits,Use_spatial_pyramid,us
         TrainingSplit, ValidationSplit=dataUtils.getTrainingValidationSplit(train_images_filenames,train_labels,train_percentage)
     
     #Get descriptors D
-    if Use_spatial_pyramid:
+    if Use_spatial_pyramid != 0:
         D, Train_descriptors, Train_label_per_descriptor, Train_keypoints, Train_image_size = descriptors.extractFeaturesPyramid(TrainingSplit,descriptor_type,num_slots)
     else:
         D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeatures(TrainingSplit, descriptor_type,num_slots)
@@ -70,18 +68,17 @@ def launchsession2(num_slots,descriptor_type,randomSplits,Use_spatial_pyramid,us
         validation_accuracy = Evaluation.getMeanAccuracy(clf,predictedLabels,validation_labels)
         print 'Final validation accuracy: ' + str(validation_accuracy)
     #Roc curve and Confusion Matrix
-#    if rocCurveCM:
-#        graphs.rcurve(predictedLabels,validation_labels,clf)
-#        graphs.plot_confusion_matrix(clf,validation_labels,stdSlr.transform(predictedLabels),normalize=False,title='Confusion matrix',cmap=plt.cm.Blues)
+    if rocCurveCM:
+        graphs.rcurve(predictedLabels,validation_labels,clf)
+        graphs.plot_confusion_matrix(clf,validation_labels,stdSlr.transform(predictedLabels),normalize=False,title='Confusion matrix',cmap=plt.cm.Blues)
     
     end=time.time()
     print 'Done in '+str(end-start)+' secs.'
 
 
 if __name__ == '__main__':
-    num_slots=2
+    num_slots=4
     Use_spatial_pyramid = [[2,2], [4,4]]
-#    Use_spatial_pyramid = 0
     useKernelInter = False
     randomSplits = True
     rocCurveCM = False
