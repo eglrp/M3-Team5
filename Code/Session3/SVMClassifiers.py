@@ -10,6 +10,7 @@ import kernelIntersection
 
 def trainSVM(fisher,train_labels,Cparam=1,kernel_type='linear'):
     stdSlr = StandardScaler().fit(fisher)
+
     D_scaled = stdSlr.transform(fisher)
     print 'Training the SVM classifier...'
     clf = svm.SVC(kernel=kernel_type, C=Cparam).fit(D_scaled, train_labels)
@@ -33,8 +34,13 @@ def predict(test_images_filenames,descriptor_type,stdSlr, gmm,k, levels_pyramid,
     data = [k,descriptor_type,gmm,levels_pyramid]#shared data with processes
     
     pool = Pool(processes=num_slots,initializer=initPool, initargs=[data])
-    if levels_pyramid>0:
+    if levels_pyramid > 0:
         fisher_test = pool.map(getFisherForImageSpatialPyramid, test_images_filenames)
+        fv = np.zeros([len(fisher_test), len(fisher_test[0][0])], dtype = np.float32)
+        for i in range(len(fisher_test)):
+            fv[i, :] = fisher_test[i][0]
+        fisher_test = fv
+        
     else:
         fisher_test= pool.map(getFisherForImage, test_images_filenames)
     pool.terminate()
@@ -83,7 +89,7 @@ def getFisherForImageSpatialPyramid(filename):
     
     #Compute spatial pyramid
     fisher_test = spt_py.spatial_pyramid_fisher(np.float32(gray.shape), des, coordinates_keypoints, k, gmm,levels_pyramid)
-    
+                                                
     return fisher_test
     
 def getPredictionForImageKIntersection(filename):
@@ -124,6 +130,7 @@ def getPredictionForImageKIntersectionSpatialPyramid(filename):
     coordinates_keypoints = [kp.pt for kp in kpt]
 
     fisher_test = spt_py.spatial_pyramid_fisher(np.float32(gray.shape), des, coordinates_keypoints, k, gmm, levels_pyramid)
+    
     
     test_scaled=computedstdSlr.transform(fisher_test)
     test_scaled=test_scaled.reshape(1,-1)

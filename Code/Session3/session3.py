@@ -27,8 +27,12 @@ def launchsession3(num_slots,descriptor_type,randomSplits,levels_pyramid,useKern
     #Computing gmm
     k = 32
     
-    gmm=fisherVectors.getGMM(D,k)
-    fisher=fisherVectors.getFisherVectors(Train_descriptors,k,gmm)
+    gmm = fisherVectors.getGMM(D,k)
+    
+    if levels_pyramid > 0:
+        fisher = fisherVectors.getFisherVectorsSpatialPyramid(Train_descriptors, k, gmm, Train_image_size, Train_keypoints, levels_pyramid)
+    else:    
+        fisher = fisherVectors.getFisherVectors(Train_descriptors,k,gmm)
     
     # Train a linear SVM classifier
     if useKernelInter:
