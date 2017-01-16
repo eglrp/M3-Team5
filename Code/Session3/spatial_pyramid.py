@@ -100,7 +100,15 @@ def spatial_pyramid_fisher(size_image, descriptors, coordinates_keypoints, k, gm
                           
     return fisher_vector
 
-
-
+def add_weights():
+    num_subim = list(np.append([1], [levels_pyramid[i][0]*levels_pyramid[i][1] for i in range(len(levels_pyramid))]))
+    num_grids = sum(num_subim)
+    acc_grid = list(np.cumsum(num_subim))
+    d = int(descriptors.shape[1])
+    dim_vec = 2*d*k
+    L = len(levels_pyramid)
+    fisher_vector[:, 0:dim_vec] = np.float32(fisher_vector[:, 0:dim_vec])*(1.0/2**L)
+    for i in range(1, len(num_subim)):
+       fisher_vector[:, dim_vec*(acc_grid[i - 1]):dim_vec*(acc_grid[i - 1] + num_subim[i])] = np.float32(fisher_vector[:, dim_vec*(acc_grid[i - 1]):dim_vec*(acc_grid[i - 1] + num_subim[i])])*(1.0/(2**(L - i + 1)))
     
     
