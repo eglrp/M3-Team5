@@ -7,8 +7,8 @@ import re
 
 if __name__ == '__main__':
     levels_pyramid = 0
-    useKernelInter = False
     randomSplits = True
+    usePCA=0
     
     try:
         if len(sys.argv) < 3:
@@ -31,12 +31,12 @@ if __name__ == '__main__':
                         levels=r.split(',')
                         levels_pyramid.append([int(levels[0]),int(levels[1])])
                 index += 2
-            elif sys.argv[index].lower() == '--usehik':
-                useKernelInter = True
-                index += 1
             elif sys.argv[index].lower() == '--norandoms':
                 randomSplits = False
                 index += 1
+            elif sys.argv[index].lower() == '--pca':
+                usePCA=int(sys.argv[index + 1])
+                index += 2
             else:
                 raise ValueError, "Unknown parameter: %s" % (sys.argv[index])
     except:
@@ -50,9 +50,9 @@ if __name__ == '__main__':
         print "        <descriptor_type>    descriptor type (DENSE, SIFT, SURF, ORB, HARRIS)."
         print " --levelsp <pyramid_levels>  number of levels of the spatial pyramid, if used (default=0)."
         print "           --norandoms       disable random validation splits for cross validation."
-        print "           --usehik          enable to use the histogram intersection kernel."
+        print "         --pca <pca>         pca input, if used."
         print ""
         raise
     
-    print "Using %s detector, randomSplits=%s, levels_pyramid=%s, useKernelInter=%s" % (descriptor_type,randomSplits,levels_pyramid,useKernelInter)
-    session3.launchsession3(num_slots,descriptor_type,randomSplits,levels_pyramid,useKernelInter)
+    print "Using %s detector, randomSplits=%s, levels_pyramid=%s, usePCA=%s" % (descriptor_type,randomSplits,levels_pyramid,usePCA)
+    session3.launchsession3(num_slots,descriptor_type,randomSplits,levels_pyramid,usePCA)
