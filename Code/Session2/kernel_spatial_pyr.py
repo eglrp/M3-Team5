@@ -9,21 +9,19 @@ import kernelIntersection
 
 
 def spatialPyramidKernel(M,N,levels_pyramid):
-
     K_int=np.zeros([len(M),len(N)])
-    
 
     for Mi in range(len(M)):
         for Ni in range(len(N)):
-            K_int[Mi,Ni]= pyramidkernel(M[Mi,:],N[Ni,:],M.size[1])
+            K_int[Mi,Ni]= pyramidkernel(M[Mi,:],N[Ni,:],levels_pyramid,int(M.shape[1]))
     return K_int
-    
-    
+
+
 def pyramidkernel(hist1,hist2,levels_pyramid,length):
     
     weight_hist1 = add_weights(hist1,levels_pyramid,length)
     weight_hist2 = add_weights(hist2,levels_pyramid,length)
-    intersection_Pyramid = kernelIntersection.intersection( weight_hist1, weight_hist2 );
+    intersection_Pyramid = kernelIntersection.intersection(weight_hist1, weight_hist2);
     return intersection_Pyramid
     
 def add_weights(fullHistogram,levels_pyramid,length):
@@ -35,4 +33,4 @@ def add_weights(fullHistogram,levels_pyramid,length):
     for i in range(1, len(num_subim)):
         fullHistogram[k*(acc_grid[i - 1]):k*(acc_grid[i])] = np.float32( fullHistogram[ k*(acc_grid[i - 1]):k*(acc_grid[i])])*(1.0/(2**(L - i + 1)))
     
-    
+    return fullHistogram

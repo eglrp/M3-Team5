@@ -5,6 +5,7 @@ from sklearn import svm
 from multiprocessing import Pool
 import descriptors
 import spatial_pyramid as spt_py
+import kernel_spatial_pyr
 import kernelIntersection
 
 def trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linear',degree_value=1,gamma_value=0.01,weight = 'balanced',probabilities=False):
@@ -17,24 +18,27 @@ def trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linea
 
     return clf,stdSlr
  
-def trainSVMKIntersection(visual_words,Train_label_per_descriptor,Cparam=1,probabilities=False):
+def trainSVMKernel(visual_words,Train_label_per_descriptor,useKernelPyr,levels_pyramid,Cparam=1,probabilities=False):
     # Train a SVM classifier
     stdSlr = StandardScaler().fit(visual_words)
     D_scaled = stdSlr.transform(visual_words)
-    kernelMatrix =kernelIntersection.histogramIntersection(D_scaled,D_scaled)
+    if useKernelPyr:
+        kernelMatrix = kernel_spatial_pyr.spatialPyramidKernel(D_scaled,D_scaled,levels_pyramid)
+    else:
+        kernelMatrix = kernelIntersection.histogramIntersection(D_scaled,D_scaled)
     print 'Training the SVM classifier...'
     clf = svm.SVC(kernel='precomputed', C=Cparam,probability=probabilities)
     clf.fit(kernelMatrix, Train_label_per_descriptor)
     print 'Done!'
     return clf,stdSlr,D_scaled
 
-def predict(test_images_filenames,descriptor_type,stdSlr, codebook,k, Use_spatial_pyramid, num_slots):
+def predict(test_images_filenames,descriptor_type,stdSlr, codebook,k, levels_pyramid, num_slots):
     #Predict test set labels with the trained classifier
-    data = [codebook,k,descriptor_type, Use_spatial_pyramid]#shared data with processes
+    data = [codebook,k,descriptor_type, levels_pyramid]#shared data with processes
     
     
     pool = Pool(processes=num_slots,initializer=initPool, initargs=[data])
-    if Use_spatial_pyramid != 0:
+    if levels_pyramid != 0:
 #        visual_words_test=np.zeros((len(test_images_filenames), 21*k),dtype=np.float32)
         visual_words_test = pool.map(getVisualWordsForImageSpatialPyramid, test_images_filenames)
         
@@ -55,16 +59,15 @@ def predict(test_images_filenames,descriptor_type,stdSlr, codebook,k, Use_spatia
     #return predictions
     return predictedLabels
     
-def predictKernelIntersection(test_images_filenames,descriptor_type,clf,stdSlr,train_scaled,k,codebook,Use_spatial_pyramid,num_slots):
+def predictKernel(test_images_filenames,descriptor_type,clf,stdSlr,train_scaled,k,codebook,levels_pyramid,num_slots):
     #Predict test set labels with the trained classifier
-    data = [train_scaled,clf,stdSlr,descriptor_type,k,codebook]#shared data with processes
+    data = [train_scaled,clf,stdSlr,descriptor_type,k,codebook,levels_pyramid]#shared data with processes
     
     pool = Pool(processes=num_slots,initializer=initPool, initargs=[data])
-    if Use_spatial_pyramid:
-        predictedClasses= pool.map(getPredictionForImageKIntersectionSpatialPyramid, test_images_filenames)
+    if levels_pyramid != 0:
+        predictedClasses= pool.map(getPredictionForImageKernelSpatialPyramid, test_images_filenames)
     else:
-        predictedClasses= pool.map(getPredictionForImageKIntersection, test_images_filenames)
-    
+        predictedClasses= pool.map(getPredictionForImageKernel, test_images_filenames)
     pool.terminate()
     
     predictions=[str(x) for x in predictedClasses]
@@ -88,7 +91,7 @@ def getVisualWordsForImageSpatialPyramid(filename):
     codebook = data[0]
     k = data[1]
     descriptor_type = data[2]
-    Use_spatial_pyramid = data[3]
+    levels_pyramid = data[3]
     
     ima = cv2.imread(filename)
     gray = cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
@@ -98,11 +101,11 @@ def getVisualWordsForImageSpatialPyramid(filename):
     coordinates_keypoints = [kp.pt for kp in kpt]
     
     #Compute spatial pyramid
-    visual_words = spt_py.spatial_pyramid(np.float32(gray.shape), des, coordinates_keypoints, codebook, k, Use_spatial_pyramid)
+    visual_words = spt_py.spatial_pyramid(np.float32(gray.shape), des, coordinates_keypoints, codebook, k, levels_pyramid)
     
     return visual_words
     
-def getPredictionForImageKIntersection(filename):
+def getPredictionForImageKernel(filename):
     train_scaled=data[0]
     computedClf=data[1]
     computedstdSlr=data[2]
@@ -127,13 +130,14 @@ def getPredictionForImageKIntersection(filename):
     
     return predictedClass
     
-def getPredictionForImageKIntersectionSpatialPyramid(filename):
+def getPredictionForImageKernelSpatialPyramid(filename):
     train_scaled=data[0]
     computedClf=data[1]
     computedstdSlr=data[2]
     descriptor_type=data[3]
     k=data[4]
     codebook=data[5]
+    levels_pyramid = data[6]
     
     ima = cv2.imread(filename)
     gray = cv2.cvtColor(ima,cv2.COLOR_BGR2GRAY)
@@ -142,13 +146,14 @@ def getPredictionForImageKIntersectionSpatialPyramid(filename):
     kpt, des = descriptors.getKeyPointsDescriptors(detector,gray,descriptor_type)
     coordinates_keypoints = [kp.pt for kp in kpt]
 
-    test_visual_words = spt_py.spatial_pyramid(np.float32(gray.shape), des, coordinates_keypoints, codebook, k)
+    test_visual_words = spt_py.spatial_pyramid(np.float32(gray.shape), des, coordinates_keypoints, codebook, k, levels_pyramid)
 
     test_scaled=computedstdSlr.transform(test_visual_words)
     test_scaled=test_scaled.reshape(1,-1)
     
     #Predict the label for each descriptor
-    predictMatrix = kernelIntersection.histogramIntersection(test_scaled, train_scaled)
+    #predictMatrix = kernelIntersection.histogramIntersection(test_scaled, train_scaled)
+    predictMatrix = kernel_spatial_pyr.spatialPyramidKernel(test_scaled, train_scaled, levels_pyramid)
     SVMpredictions = computedClf.predict(predictMatrix)
     
     values, counts = np.unique(SVMpredictions, return_counts=True)

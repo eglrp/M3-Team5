@@ -5,7 +5,7 @@ sys.path.append('.')
 import time
 import descriptors, SVMClassifiers, Evaluation, dataUtils,BoW,graphs
 import matplotlib.pyplot as plt
-def launchsession2(num_slots,descriptor_type,randomSplits,levels_pyramid,useKernelInter,rocCurveCM):
+def launchsession2(num_slots,descriptor_type,randomSplits,levels_pyramid,useKernelInter,useKernelPyr,rocCurveCM):
     start = time.time()
     
     # Read the train and test files
@@ -35,16 +35,16 @@ def launchsession2(num_slots,descriptor_type,randomSplits,levels_pyramid,useKern
         visual_words = BoW.getVisualWords(codebook, k, Train_descriptors)
     
     # Train a linear SVM classifier
-    if useKernelInter:
+    if useKernelInter|useKernelPyr:
         #Kernel intersection
-        clf, stdSlr,train_scaled=SVMClassifiers.trainSVMKIntersection(visual_words,Train_label_per_descriptor,Cparam=1,probabilities=rocCurveCM)
+        clf, stdSlr,train_scaled=SVMClassifiers.trainSVMKernel(visual_words,Train_label_per_descriptor,useKernelPyr,levels_pyramid,Cparam=1,probabilities=rocCurveCM)
     else:
         clf, stdSlr=SVMClassifiers.trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linear',probabilities=rocCurveCM)
 
 
     #For test set
-    if useKernelInter:
-        predictedLabels2=SVMClassifiers.predictKernelIntersection(test_images_filenames,descriptor_type,clf,stdSlr,train_scaled,k,codebook,levels_pyramid,num_slots)
+    if useKernelInter|useKernelPyr:
+        predictedLabels2=SVMClassifiers.predictKernel(test_images_filenames,descriptor_type,clf,stdSlr,train_scaled,k,codebook,levels_pyramid,num_slots)
         accuracy2 = Evaluation.computeAccuracyOld(predictedLabels2,test_labels)
         print 'Final Kernel intersection test accuracy: ' + str(accuracy2)
     else:
@@ -56,9 +56,8 @@ def launchsession2(num_slots,descriptor_type,randomSplits,levels_pyramid,useKern
 
     #For validation set
     validation_images_filenames,validation_labels=dataUtils.unzipTupleList(ValidationSplit)
-    if useKernelInter:
-        #Kernel intersection
-        predictedLabels2=SVMClassifiers.predictKernelIntersection(validation_images_filenames,descriptor_type,clf,stdSlr,train_scaled,k,codebook,levels_pyramid,num_slots)
+    if useKernelInter|useKernelPyr:
+        predictedLabels2=SVMClassifiers.predictKernel(validation_images_filenames,descriptor_type,clf,stdSlr,train_scaled,k,codebook,levels_pyramid,num_slots)
         accuracy2 = Evaluation.computeAccuracyOld(predictedLabels2,validation_labels)
         print 'Final Kernel intersection validation accuracy: ' + str(accuracy2)
     else:
@@ -79,11 +78,12 @@ def launchsession2(num_slots,descriptor_type,randomSplits,levels_pyramid,useKern
 if __name__ == '__main__':
     num_slots=4
     useKernelInter = False
-    randomSplits = True
-    levels_pyramid = 0#[[2,2], [4,4]]
+    randomSplits = False
+    levels_pyramid = [[2,2], [4,4]]
+    useKernelPyr=True
     rocCurveCM = False
 
     # "SIFT", "SURF", "ORB", "HARRIS", "DENSE"
     descriptor_type = "SIFT"
-    print "Using %s detector, randomSplits=%s, levels_pyramid=%s, useKernelInter=%s" % (descriptor_type,randomSplits,levels_pyramid,useKernelInter)
-    launchsession2(num_slots,descriptor_type,randomSplits,levels_pyramid,useKernelInter,rocCurveCM)
+    print "Using %s detector, randomSplits=%s, levels_pyramid=%s, useKernelInter=%s, useKernelPyr=%s" % (descriptor_type,randomSplits,levels_pyramid,useKernelInter,useKernelPyr)
+    launchsession2(num_slots,descriptor_type,randomSplits,levels_pyramid,useKernelInter,useKernelPyr,rocCurveCM)
