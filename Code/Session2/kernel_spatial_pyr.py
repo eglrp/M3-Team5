@@ -27,7 +27,7 @@ def pyramidkernel(hist1,hist2,levels_pyramid,length):
 def add_weights(fullHistogram,levels_pyramid,length):
     num_subim = list(np.append([1], [levels_pyramid[i][0]*levels_pyramid[i][1] for i in range(len(levels_pyramid))]))
     acc_grid = list(np.cumsum(num_subim))
-    k = length/acc_grid[len(acc_grid)] 
+    k = length/acc_grid[len(acc_grid)-1] 
     L = len(levels_pyramid)
     fullHistogram[0:k] = np.float32( fullHistogram[0:k])*(1.0/2**L)
     for i in range(1, len(num_subim)):
