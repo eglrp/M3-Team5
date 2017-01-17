@@ -1,7 +1,7 @@
 #!/bin/env python
 import sys
 sys.path.append('.')
-
+import numpy as np
 import time
 import descriptors, SVMClassifiers, Evaluation, dataUtils,fisherVectors, PCA_computing
 
@@ -26,12 +26,12 @@ def launchsession3(num_slots,descriptor_type,randomSplits,levels_pyramid,usePCA)
     
     if usePCA>0:
         print 'Applying PCA'
-        D, pca = PCA_computing.PCA_to_data(D, usePCA)
+        D, Train_descriptors, pca = PCA_computing.PCA_to_data(D, Train_descriptors, usePCA)
     else:
-        pca=None
+        pca = None
     
     #Computing gmm
-    k = 32
+    k = 32      # short codebooks (32, 64...)
     
     gmm = fisherVectors.getGMM(D,k)
     
@@ -39,6 +39,13 @@ def launchsession3(num_slots,descriptor_type,randomSplits,levels_pyramid,usePCA)
         fisher = fisherVectors.getFisherVectorsSpatialPyramid(Train_descriptors, k, gmm, Train_image_size, Train_keypoints, levels_pyramid)
     else:
         fisher = fisherVectors.getFisherVectors(Train_descriptors,k,gmm)
+        
+    # Power-normalization
+    #fisher = np.sign(fisher) * np.abs(fisher) ** 0.5
+
+    # L2 normalize
+    norms = np.sqrt(np.sum(fisher ** 2, 1))
+    fisher /= norms.reshape(-1, 1)
     
     # Train a linear SVM classifier
     clf, stdSlr=SVMClassifiers.trainSVM(fisher,Train_label_per_descriptor,Cparam=1,kernel_type='linear')

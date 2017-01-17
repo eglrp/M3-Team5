@@ -43,7 +43,7 @@ def getFisherForImage(filename):
     kpt,des=getKptDesForImage(filename,descriptor_type)
     
     if computedPca != None:
-        des#PCA
+        des = computedPca.transform(des)
     
     fisher_test=ynumpy.fisher(gmm, des, include = ['mu','sigma'])
     
@@ -64,7 +64,7 @@ def getFisherForImageSpatialPyramid(filename):
     coordinates_keypoints = [kp.pt for kp in kpt]
     
     if computedPca != None:
-        des#PCA
+        des = computedPca.transform(des)
 
     #Compute spatial pyramid
     fisher_test = spt_py.spatial_pyramid_fisher(np.float32(gray.shape), des, coordinates_keypoints, k, gmm,levels_pyramid)
