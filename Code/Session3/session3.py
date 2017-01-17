@@ -1,7 +1,7 @@
 #!/bin/env python
 import sys
 sys.path.append('.')
-
+import numpy as np
 import time
 import descriptors, SVMClassifiers, Evaluation, dataUtils,fisherVectors, PCA_computing
 
@@ -31,9 +31,15 @@ def launchsession3(num_slots,descriptor_type,randomSplits,levels_pyramid,usePCA)
         pca = None
     
     #Computing gmm
-    k = 32      # short codebooks (32, 64...)
+    k = 64      # short codebooks (32, 64...)
     
     gmm = fisherVectors.getGMM(D,k)
+    
+    
+    for idx,TrainDes in enumerate(Train_descriptors):    
+            train_descriptor = np.float32(TrainDes)
+            Train_descriptors[idx]=train_descriptor
+
     
     if levels_pyramid > 0:
         fisher = fisherVectors.getFisherVectorsSpatialPyramid(Train_descriptors, k, gmm, Train_image_size, Train_keypoints, levels_pyramid)
