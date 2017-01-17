@@ -45,8 +45,10 @@ def getFisherVectorsSpatialPyramid(Train_descriptors, k, gmm, Train_image_size, 
 def normalizeL2(fisher):
     norms = np.sqrt(np.sum(fisher ** 2, 1))
     fisher /= norms.reshape(-1, 1)
+    fisher=np.float32(fisher)
     return fisher
     
 def powerNormalization(fisher):
     fisher = np.sign(fisher) * np.abs(fisher) ** 0.5
+    fisher=np.float32(fisher)
     return fisher
