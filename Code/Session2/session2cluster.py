@@ -9,6 +9,7 @@ if __name__ == '__main__':
     levels_pyramid = 0
     useKernelInter = False
     randomSplits = True
+    useKernelPyr=False
     
     try:
         if len(sys.argv) < 3:
@@ -34,6 +35,11 @@ if __name__ == '__main__':
             elif sys.argv[index].lower() == '--usehik':
                 useKernelInter = True
                 index += 1
+            elif sys.argv[index].lower() == '--usespk':
+                if levels_pyramid==0:
+                    raise ValueError, "Enter first levelsp to use the spatial pyramid kernel."
+                useKernelPyr = True
+                index += 1
             elif sys.argv[index].lower() == '--norandoms':
                 randomSplits = False
                 index += 1
@@ -51,8 +57,9 @@ if __name__ == '__main__':
         print " --levelsp <pyramid_levels>  number of levels of the spatial pyramid, if used (default=0)."
         print "           --norandoms       disable random validation splits for cross validation."
         print "           --usehik          enable to use the histogram intersection kernel."
+        print "           --usespk          enable to use the spatial pyramid kernel (it requires the levelsp parameter)."
         print ""
         raise
     
     print "Using %s detector, randomSplits=%s, levels_pyramid=%s, useKernelInter=%s" % (descriptor_type,randomSplits,levels_pyramid,useKernelInter)
-    session2.launchsession2(num_slots,descriptor_type,randomSplits,levels_pyramid,useKernelInter,False)
+    session2.launchsession2(num_slots,descriptor_type,randomSplits,levels_pyramid,useKernelInter,useKernelPyr,False)
