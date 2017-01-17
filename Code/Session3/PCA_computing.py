@@ -3,7 +3,6 @@ from sklearn.decomposition import PCA
 def PCA_to_data(D, Train_descriptors, num_components):
     
     pca = PCA(n_components = num_components)
-    pca.components_
     pca.fit(D)
     
     new_D = pca.transform(D)
