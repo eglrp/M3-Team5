@@ -40,4 +40,13 @@ def getFisherVectorsSpatialPyramid(Train_descriptors, k, gmm, Train_image_size, 
     end = time.time()
     print 'Done in '+str(end-init)+' secs.'
     
-    return fisher       
+    return fisher
+    
+def normalizeL2(fisher):
+    norms = np.sqrt(np.sum(fisher ** 2, 1))
+    fisher /= norms.reshape(-1, 1)
+    return fisher
+    
+def powerNormalization(fisher):
+    fisher = np.sign(fisher) * np.abs(fisher) ** 0.5
+    return fisher

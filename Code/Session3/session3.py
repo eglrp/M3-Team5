@@ -1,7 +1,7 @@
 #!/bin/env python
 import sys
 sys.path.append('.')
-import numpy as np
+
 import time
 import descriptors, SVMClassifiers, Evaluation, dataUtils,fisherVectors, PCA_computing
 
@@ -41,11 +41,10 @@ def launchsession3(num_slots,descriptor_type,randomSplits,levels_pyramid,usePCA)
         fisher = fisherVectors.getFisherVectors(Train_descriptors,k,gmm)
         
     # Power-normalization
-    #fisher = np.sign(fisher) * np.abs(fisher) ** 0.5
+    #fisher=fisherVectors.powerNormalization(fisher)
 
     # L2 normalize
-    norms = np.sqrt(np.sum(fisher ** 2, 1))
-    fisher /= norms.reshape(-1, 1)
+    fisher=fisherVectors.normalizeL2(fisher)
     
     # Train a linear SVM classifier
     clf, stdSlr=SVMClassifiers.trainSVM(fisher,Train_label_per_descriptor,Cparam=1,kernel_type='linear')
