@@ -25,12 +25,13 @@ def pyramidkernel(hist1,hist2,levels_pyramid,length):
     return intersection_Pyramid
     
 def add_weights(fullHistogram,levels_pyramid,length):
+    weightedHistogram=np.zeros(len(fullHistogram))
     num_subim = list(np.append([1], [levels_pyramid[i][0]*levels_pyramid[i][1] for i in range(len(levels_pyramid))]))
     acc_grid = list(np.cumsum(num_subim))
     k = length/acc_grid[len(acc_grid)-1] 
     L = len(levels_pyramid)
-    fullHistogram[0:k] = np.float32( fullHistogram[0:k])*(1.0/2**L)
+    weightedHistogram[0:k] = np.float32( fullHistogram[0:k])*(1.0/2**L)
     for i in range(1, len(num_subim)):
-        fullHistogram[k*(acc_grid[i - 1]):k*(acc_grid[i])] = np.float32( fullHistogram[ k*(acc_grid[i - 1]):k*(acc_grid[i])])*(1.0/(2**(L - i + 1)))
+        weightedHistogram[k*(acc_grid[i-1]):k*(acc_grid[i])] = np.float32( fullHistogram[k*(acc_grid[i-1]):k*(acc_grid[i])])*(1.0/(2**(L-i+1)))
     
-    return fullHistogram
+    return weightedHistogram

@@ -19,21 +19,6 @@ def getORBDetector():
 def getHARRISDetector():
     detector = cv2.FeatureDetector_create("HARRIS")
     return detector
-     
-#def getMSERDetector():
-#    #detector = cv2.MSER()
-#    detector=cv2.FeatureDetector_create("MSER")
-#    return detector
-
-#def getSTARDetector():
-#    #detector = cv2.StarDetector()
-#    detector = cv2.StarFeatureDetector()
-#    #detector = cv2.FeatureDetector_create("STAR")
-#    return detector
-
-#def getFASTDetector():
-#    detector = cv2.FastFeatureDetector(nonmaxSuppression=0)
-#    return detector    
 
 def getDENSEDetector():
     detector = None
