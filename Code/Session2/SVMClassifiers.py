@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler,MinMaxScaler
 from sklearn import svm
 from multiprocessing import Pool
 import descriptors
@@ -11,6 +11,7 @@ import kernelIntersection
 def trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linear',degree_value=1,gamma_value=0.01,weight = 'balanced',probabilities=False):
     # Train a SVM classifier
     stdSlr = StandardScaler().fit(visual_words)
+    #stdSlr = MinMaxScaler(feature_range=(0,1)).fit(visual_words)
     D_scaled = stdSlr.transform(visual_words)
     print 'Training the SVM classifier...'
     clf = svm.SVC(kernel=kernel_type, C=Cparam,degree=degree_value,gamma=gamma_value,class_weight=weight,probability = probabilities).fit(D_scaled, Train_label_per_descriptor)
@@ -21,6 +22,7 @@ def trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linea
 def trainSVMKernel(visual_words,Train_label_per_descriptor,useKernelPyr,levels_pyramid,Cparam=1,probabilities=False):
     # Train a SVM classifier
     stdSlr = StandardScaler().fit(visual_words)
+    #stdSlr = MinMaxScaler(feature_range=(0,1)).fit(visual_words)
     D_scaled = stdSlr.transform(visual_words)
     if useKernelPyr:
         kernelMatrix = kernel_spatial_pyr.spatialPyramidKernel(D_scaled,D_scaled,levels_pyramid)

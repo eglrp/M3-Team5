@@ -61,5 +61,5 @@ if __name__ == '__main__':
         print ""
         raise
     
-    print "Using %s detector, randomSplits=%s, levels_pyramid=%s, useKernelInter=%s" % (descriptor_type,randomSplits,levels_pyramid,useKernelInter)
+    print "Using %s detector, randomSplits=%s, levels_pyramid=%s, useKernelInter=%s, useKernelPyr=%s" % (descriptor_type,randomSplits,levels_pyramid,useKernelInter,useKernelPyr)
     session2.launchsession2(num_slots,descriptor_type,randomSplits,levels_pyramid,useKernelInter,useKernelPyr,False)
