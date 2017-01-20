@@ -25,7 +25,12 @@ def getDENSEDetector():
     
     return detector
 
+
+
+
 def getKeyPointsDescriptors(detector,image,descriptor_type):
+    
+    
     #Descriptors
     if descriptor_type == 'SIFT' :
         kpt,des=detector.detectAndCompute(image,None)
@@ -44,12 +49,20 @@ def getKeyPointsDescriptors(detector,image,descriptor_type):
     return kpt,des
 
 #Extract features methods
-def extractFeatures(FLSubset, descriptor_type, num_slots):
-    data = descriptor_type
+def extractFeatures(FLSubset, layer_taken, num_slots):
+    #Common data for pool
+    data = layer_taken
     
     pool = Pool(processes=num_slots,initializer=initPool, initargs=[data])
     deslab = pool.map(getDescriptorsAndLabelsForImage, FLSubset)
     pool.terminate()
+
+
+
+
+
+
+
 
     Train_label_per_descriptor=[x[1] for x in deslab]
     Train_descriptors=[x[0] for x in deslab]

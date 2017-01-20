@@ -91,6 +91,6 @@ if __name__ == '__main__':
     rocCurveCM = False
 
     # "SIFT", "SURF", "ORB", "HARRIS", "DENSE"
-    layer_taken = "SIFT"
+    layer_taken = "fc1"
     print "Taking layer %s , randomSplits=%s, levels_pyramid=%s, useKernelInter=%s, useKernelPyr=%s" % (layer_taken, randomSplits, levels_pyramid, useKernelInter, useKernelPyr)
     launchsession4(num_slots, layer_taken, randomSplits, levels_pyramid, useKernelInter, useKernelPyr, rocCurveCM)
