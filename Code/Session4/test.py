@@ -20,7 +20,7 @@ base_model = VGG16(weights='imagenet')
 plot(base_model, to_file='modelVGG16.png', show_shapes=True, show_layer_names=True)
 
 #read and process image
-img_path = '../../Databases/MIT/test/coast/art1130.jpg'
+img_path = '../../Databases/MIT_split/test/coast/art1130.jpg'
 img = image.load_img(img_path, target_size=(224, 224))
 x = image.img_to_array(img)
 x = np.expand_dims(x, axis=0)
