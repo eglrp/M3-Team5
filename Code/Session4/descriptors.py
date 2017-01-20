@@ -15,13 +15,13 @@ def getDescriptors(im, layer_taken, CNN_base_model):
     
     #Decide what to do depending on the last layer chosen
     if layer_taken == 'fc2':
-        des=0
+        des = np.array([0., 0.])
         #TO DO: decide how to get the information from this layer
     elif layer_taken == 'fc1':
-        des=0
+        des = np.array([[0., 0.], [0., 0.]])
         #TO DO: decide how to get the information from this layer
     elif layer_taken == 'block5_pool':
-        des=0
+        des = np.array([0, 0])
         
         #TO DO: decide how to get the information from this layer
     #des must be a numpy array with rows corresponding to different descriptors
@@ -38,16 +38,33 @@ def extractFeatures(FLSubset, layer_taken, num_slots):
     deslab = pool.map(getDescriptorsAndLabelsForImage, FLSubset)
     pool.terminate()
 
-    Train_label_per_descriptor = [x[1] for x in deslab]
+    labels = [x[1] for x in deslab]
     Train_descriptors = [x[0] for x in deslab]
+    print Train_descriptors[0]
+    print len(Train_descriptors[0])
+    print type(Train_descriptors)
+    print type(Train_descriptors[0])
+    # Transform everything to numpy arrays
+    if not(layer_taken == 'fc1' or layer_taken == 'fc2' or layer_taken == 'flatten'):
+        size_descriptors = Train_descriptors[0].shape[1]
+    else:    
+        size_descriptors = Train_descriptors[0].shape[0]
+    D = np.zeros((np.sum([len(p) for p in Train_descriptors]), size_descriptors), dtype=np.float32)
+    print D.shape
     
     # Transform everything to numpy arrays
-    size_descriptors = Train_descriptors[0].shape[1]
-    D = np.zeros((np.sum([len(p) for p in Train_descriptors]), size_descriptors), dtype=np.float32)
+    
     startingpoint = 0
-    for i in range(len(Train_descriptors)):
+    Train_label_per_descriptor = np.array([labels[0]]*Train_descriptors[0].shape[0])
+    D[startingpoint:startingpoint + len(Train_descriptors[0])] = Train_descriptors[0]
+    startingpoint += len(Train_descriptors[0])
+    
+    for i in range(1,len(Train_descriptors)):
+        
+        Train_label_per_descriptor = np.hstack((Train_label_per_descriptor,np.array([labels[i]]*Train_descriptors[i].shape[0])))
         D[startingpoint:startingpoint + len(Train_descriptors[i])] = Train_descriptors[i]
         startingpoint += len(Train_descriptors[i])
+        
     
     return D, Train_descriptors, Train_label_per_descriptor
 
@@ -58,7 +75,7 @@ def getDescriptorsAndLabelsForImage((filename,label)):
     
     img = image.load_img(filename, target_size=(224, 224))
     x = image.img_to_array(img)
-    x = np.expand_dims(x, axis=0)
+    x = np.expand_dims(x, axis = 0)
     im = preprocess_input(x)    
 
     des = getDescriptors(im, layer_taken, CNN_base_model)
