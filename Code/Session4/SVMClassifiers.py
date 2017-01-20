@@ -3,7 +3,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn import svm
 from multiprocessing import Pool
 import descriptors
-import spatial_pyramid as spt_py
 
 def trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linear',degree_value=1,gamma_value=0.01,weight = 'balanced'):
     # Train a SVM classifier
