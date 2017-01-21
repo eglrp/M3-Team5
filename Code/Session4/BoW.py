@@ -13,7 +13,7 @@ def computeCodebook(D,k):
     print 'Done in '+str(end-init)+' secs.'
 
     return codebook
-    
+
 def getVisualWords(codebook,k,Train_descriptors):
     print 'Computing visual words'
     init=time.time()

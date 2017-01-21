@@ -2,11 +2,9 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn import svm
 from multiprocessing import Pool
-import descriptors
+import descriptors,BoW
 
-from keras.applications.vgg16 import VGG16
-from keras.preprocessing import image
-from keras.applications.vgg19 import preprocess_input
+from keras.models import Model
 
 def trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linear',degree_value=1,gamma_value=0.01,weight = 'balanced'):
     # Train a SVM classifier
@@ -18,49 +16,46 @@ def trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linea
 
     return clf,stdSlr
 
-def predict(test_images_filenames, layer_taken, stdSlr, codebook, k, num_slots):
-    #Predict test set labels with the trained classifier
-    CNN_base_model = VGG16(weights='imagenet')
-    data = [codebook, k, layer_taken, CNN_base_model]#shared data with processes
-    
-    pool = Pool(processes=num_slots,initializer=initPool, initargs=[data])
-    
-    visual_words_test = pool.map(getVisualWordsForImage, test_images_filenames)
-    if not codebook:
-        vw = np.zeros([len(visual_words_test), len(visual_words_test[0][0])], dtype = np.float32)
-        for i in range(len(visual_words_test)):
-            vw[i, :] = visual_words_test[i][0]
-        visual_words_test = vw
-        
-    pool.terminate()
+def predictBoVW(Split, layer_taken, stdSlr, codebook, k, CNN_base_model, num_slots):
+    #Compute features
+    D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeaturesMaps(Split, layer_taken, CNN_base_model, num_slots)
+    #Determine visual words
+    visual_words_test = BoW.getVisualWords(codebook, k, Train_descriptors)
 
     predictedLabels = stdSlr.transform(visual_words_test)
     
     return predictedLabels
 
-def getVisualWordsForImage(filename):
+def predict(Split, layer_taken, stdSlr, clf, CNN_base_model, num_slots):
+    #Compute features
+    CNN_new_model = Model(input=CNN_base_model.input, output=CNN_base_model.get_layer(layer_taken).output)
     
-    codebook = data[0]
-    k = data[1]
-    layer_taken = data[2]
-    CNN_base_model = data[3]
+    data = [layer_taken,clf,stdSlr,CNN_base_model,CNN_new_model]#shared data with processes
     
-    #Prerocess image
-    img = image.load_img(filename, target_size = (224, 224))
-    x = image.img_to_array(img)
-    x = np.expand_dims(x, axis = 0)
-    im = preprocess_input(x)    
-    #Obtain descriptors from CNN layer
-    des = descriptors.getDescriptors(im, layer_taken, CNN_base_model)
+    pool = Pool(processes=4,initializer=initPool, initargs=[data])
+    predictedClasses= pool.map(getPredictionForImage, Split)
+    pool.terminate()
     
-    if not(layer_taken == 'fc1' or layer_taken == 'fc2' or layer_taken == 'flatten'):
-        #Predict the label for each descriptor, when necessary
-        words = codebook.predict(des)
-        visual_words = np.bincount(words, minlength = k)
-    else:
-        visual_words = des
-        
-    return visual_words
+    predictions=[str(x) for x in predictedClasses]
+    
+    return predictions
+
+def getPredictionForImage((filename,label)):
+    layer_taken=data[0]
+    computedClf=data[1]
+    computedstdSlr=data[2]
+    CNN_base_model=data[3]
+    CNN_new_model=data[4]
+    
+    descriptors.initPool([layer_taken,CNN_base_model,CNN_new_model])
+    deslab=descriptors.getFeaturesAndLabelsForImage((filename,label))
+    
+    #Predict label
+    predictions = computedClf.predict(computedstdSlr.transform(deslab[0]))
+    values, counts = np.unique(predictions, return_counts=True)
+    predictedClass = values[np.argmax(counts)]
+    
+    return predictedClass
 
 #Multiprocessing utils
 def initPool(data_):

@@ -1,6 +1,7 @@
 import cPickle
 import numpy as np
 from random import shuffle
+import string
 
 filenames_train_file='train_images_filenames.dat'
 filenames_test_file='test_images_filenames.dat'
@@ -16,6 +17,13 @@ def readData():
     print 'Loaded '+str(len(train_images_filenames))+' training images filenames with classes ',set(train_labels)
     print 'Loaded '+str(len(test_images_filenames))+' testing images filenames with classes ',set(test_labels)
 
+    return train_images_filenames,test_images_filenames,train_labels,test_labels
+
+def readServerData():
+    train_images_filenames,test_images_filenames,train_labels,test_labels=readData()
+    train_images_filenames=[string.replace(s,'../../Databases/MIT_split','/data/MIT') for s in train_images_filenames]
+    test_images_filenames=[string.replace(s,'../../Databases/MIT_split','/data/MIT') for s in test_images_filenames]
+    
     return train_images_filenames,test_images_filenames,train_labels,test_labels
     
 def getTrainingValidationSplit(train_images_filenames,train_labels,train_percentage):
