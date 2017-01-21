@@ -17,11 +17,11 @@ def launchsession4(num_slots, layer_taken, randomSplits, k, useServer, method_us
         train_images_filenames, test_images_filenames, train_labels, test_labels = dataUtils.readData()
     
     #For testing with smaller database
-    rr = 4
-    train_images_filenames=train_images_filenames[116: 116 + rr]
-    test_images_filenames=test_images_filenames[116: 116 + rr]
-    train_labels=train_labels[116: 116 + rr]
-    test_labels=test_labels[116: 116 + rr]
+    rr = 300
+    train_images_filenames=train_images_filenames[:rr]
+    test_images_filenames=test_images_filenames[:rr]
+    train_labels=train_labels[:rr]
+    test_labels=test_labels[:rr]
     
     #Divide training into training and validation splits
     train_percentage = 0.7 #70% training 30%validation
