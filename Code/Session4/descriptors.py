@@ -13,7 +13,7 @@ def getBaseModel():
     return CNN_base_model
 
    
-def useAverage(features, output_descriptors):
+def useAverage(des, output_descriptors):
     
         
     return des
@@ -43,8 +43,9 @@ def getDescriptors(x, layer_taken, CNN_base_model, CNN_new_model, method_used):
     
             for i in range(num_des):
                 des[i, :] = np.reshape(features[i, :, :], (1, length_des))
-            
-        method = getattr(sys.modules[__name__], 'useAverage')
+        if method_used['method_to_reduce_dim'] != 'Nothing':   
+            method = getattr(sys.modules[__name__], 'use' + method_used['method_to_reduce_dim'])
+            des = method(des, method_used['Remaining_features'])
         #TO DO: decide how to get the information from this layer
     #des must be a numpy array with rows corresponding to different descriptors
     return des

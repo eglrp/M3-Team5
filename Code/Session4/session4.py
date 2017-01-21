@@ -15,10 +15,11 @@ def launchsession4(num_slots, layer_taken, randomSplits, k, useServer, method_us
         train_images_filenames, test_images_filenames, train_labels, test_labels = dataUtils.readData()
     
     #For testing with smaller database
-#    train_images_filenames=train_images_filenames[:300]
-#    test_images_filenames=test_images_filenames[:300]
-#    train_labels=train_labels[:300]
-#    test_labels=test_labels[:300]
+    rr = 2
+    train_images_filenames=train_images_filenames[:rr]
+    test_images_filenames=test_images_filenames[:rr]
+    train_labels=train_labels[:rr]
+    test_labels=test_labels[:rr]
     
     #Divide training into training and validation splits
     train_percentage = 0.7 #70% training 30%validation
@@ -60,11 +61,11 @@ def launchsession4(num_slots, layer_taken, randomSplits, k, useServer, method_us
         print 'Final test accuracy: ' + str(accuracy)
 
     #For validation set
-<<<<<<< HEAD
+
     print 'Predicting labels for validation set'
-=======
+
     validation_images_filenames, validation_labels = dataUtils.unzipTupleList(ValidationSplit)
->>>>>>> afa2cde972edae148ceaf3c903da3529f67c6cef
+
     if layer_taken == 'fc1' or layer_taken == 'fc2' or layer_taken == 'flatten':
         #Not using BoVW
         predictedLabels=SVMClassifiers.predict(ValidationSplit, layer_taken, stdSlr, clf, CNN_base_model, num_slots)
@@ -72,12 +73,10 @@ def launchsession4(num_slots, layer_taken, randomSplits, k, useServer, method_us
         print 'Final validation accuracy: ' + str(validation_accuracy)
     else:
         #BoVW
-<<<<<<< HEAD
         validation_images_filenames, validation_labels = dataUtils.unzipTupleList(ValidationSplit)
         predictedLabels = SVMClassifiers.predictBoVW(ValidationSplit, layer_taken, stdSlr, codebook, k,CNN_base_model, num_slots, method_used)
-=======
-        predictedLabels = SVMClassifiers.predictBoVW(ValidationSplit, layer_taken, stdSlr, codebook, k,CNN_base_model, num_slots)
->>>>>>> afa2cde972edae148ceaf3c903da3529f67c6cef
+
+
         validation_accuracy = Evaluation.getMeanAccuracy(clf,predictedLabels,validation_labels)
         print 'Final validation accuracy: ' + str(validation_accuracy)
 
@@ -89,9 +88,8 @@ if __name__ == '__main__':
     num_slots = 2
     randomSplits = False
     useServer=False
-    method_used = {'method_to_reduce_dim': 'PCA', 'Value_PCA':90}
-    method_used = {'clear_zero_features': True}
-    method_used = {'method_to_reduce_dim': 'average', 'Remaining_features':100}
+
+    method_used = {'method_to_reduce_dim': 'Average', 'Remaining_features': 100, 'clear_zero_features': True, 'usePCA': 90}
     layer_taken = "block5_pool"# Layer
     k = 128 #Centroids for BoVW codebook
 
