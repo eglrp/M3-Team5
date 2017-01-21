@@ -13,7 +13,7 @@ def getBaseModel():
 
 def getDescriptors(x, layer_taken, CNN_base_model, CNN_new_model):
     #Descriptors depending on the chosen layer
-    if layer_taken == 'fc2' | layer_taken == 'fc1':
+    if layer_taken == 'fc2' or layer_taken == 'fc1':
         #Extract features from last layer
         des=CNN_new_model.predict(x)
     elif layer_taken == 'block5_pool':
