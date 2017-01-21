@@ -32,13 +32,15 @@ def launchsession4(num_slots, layer_taken, randomSplits, k, useServer, method_us
     
     #Obtain information from VGG ConvNet
     CNN_base_model = descriptors.getBaseModel()#Base model
+    
+                                             
     #Compute features
     print 'Extracting features'
     D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeaturesMaps(TrainingSplit, layer_taken, CNN_base_model, num_slots, method_used)
     
     if  method_used['usePCA'] > 0:
         print 'Applying PCA'
-        D, Train_descriptors, pca = PCA_computing.PCA_to_data(D, Train_descriptors, usePCA)
+        D, Train_descriptors, pca = PCA_computing.PCA_to_data(D, Train_descriptors, method_used['usePCA'])
     else:
         pca = None
 
@@ -54,6 +56,7 @@ def launchsession4(num_slots, layer_taken, randomSplits, k, useServer, method_us
     # Train a linear SVM classifier
     clf, stdSlr = SVMClassifiers.trainSVM(visual_words, Train_label_per_descriptor,Cparam=1,kernel_type='linear')
 
+    
     #For test set
     print 'Predicting labels for test set'
     TestSplit=zip(test_images_filenames,test_labels)
@@ -68,12 +71,10 @@ def launchsession4(num_slots, layer_taken, randomSplits, k, useServer, method_us
         accuracy = Evaluation.getMeanAccuracy(clf,predictedLabels,test_labels)
         print 'Final test accuracy: ' + str(accuracy)
 
+    
     #For validation set
-
     print 'Predicting labels for validation set'
-
     validation_images_filenames, validation_labels = dataUtils.unzipTupleList(ValidationSplit)
-
     if layer_taken == 'fc1' or layer_taken == 'fc2' or layer_taken == 'flatten':
         #Not using BoVW
         predictedLabels=SVMClassifiers.predict(ValidationSplit, layer_taken, stdSlr, clf, CNN_base_model, num_slots)
@@ -101,7 +102,7 @@ if __name__ == '__main__':
     randomSplits = False
     useServer=False
 
-    method_used = {'method_to_reduce_dim': 'Average', 'Remaining_features': 100, 'clear_zero_features': True, 'usePCA': 90}
+    method_used = {'method_to_reduce_dim': 'Nothing', 'Remaining_features': 100, 'clear_zero_features': True, 'usePCA': 90}
     layer_taken = "block5_pool"# Layer
 
     k = 128 #Centroids for BoVW codebook

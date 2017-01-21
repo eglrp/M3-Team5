@@ -31,7 +31,7 @@ def getDescriptors(x, layer_taken, CNN_base_model, CNN_new_model, method_used):
         features = np.squeeze(features, axis = 0)
         num_des = features.shape[0]
         length_des = features.shape[1]*features.shape[2]
-        if clear_zeros:
+        if method_used['clear_zero_features']:
             des = np.reshape(features[0, :, :], (1, length_des))
     
             for i in range(1, num_des):
@@ -43,6 +43,7 @@ def getDescriptors(x, layer_taken, CNN_base_model, CNN_new_model, method_used):
     
             for i in range(num_des):
                 des[i, :] = np.reshape(features[i, :, :], (1, length_des))
+        
         if method_used['method_to_reduce_dim'] != 'Nothing':   
             method = getattr(sys.modules[__name__], 'use' + method_used['method_to_reduce_dim'])
             des = method(des, method_used['Remaining_features'])
