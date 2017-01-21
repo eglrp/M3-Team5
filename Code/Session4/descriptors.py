@@ -1,6 +1,7 @@
 
 import numpy as np
 from multiprocessing import Pool
+import sys
 
 from keras.applications.vgg16 import VGG16
 from keras.preprocessing import image
@@ -11,33 +12,50 @@ def getBaseModel():
     CNN_base_model = VGG16(weights='imagenet')
     return CNN_base_model
 
-def getDescriptors(x, layer_taken, CNN_base_model, CNN_new_model):
+   
+def useAverage(features, output_descriptors):
+    
+        
+    return des
+
+
+def getDescriptors(x, layer_taken, CNN_base_model, CNN_new_model, method_used):
     #Descriptors depending on the chosen layer
     if layer_taken == 'fc2' or layer_taken == 'fc1':
         #Extract features from last layer
         des=CNN_new_model.predict(x)
     elif layer_taken == 'block5_pool':
-        #From block5 pool layer we get a matrix of dim (512, 7, 7)
+        clear_zeros = method_used['clear_zeros']
+        #From block5_pool layer we get a matrix of dim (512, 7, 7)
         features = CNN_new_model.predict(x)
         features = np.squeeze(features, axis = 0)
-        des = np.zeros([512, 49])
-        zeros = 0
-        for i in range(512):
-            des[i, :] = np.reshape(features[i, :, :], (1, 49))
-            if sum(des[i, :]) == 0.0:
-                zeros += 1
-        print zeros
+        num_des = features.shape[0]
+        length_des = features.shape[1]*features.shape[2]
+        if clear_zeros:
+            des = np.reshape(features[0, :, :], (1, length_des))
+    
+            for i in range(1, num_des):
+                feat = np.reshape(features[i, :, :], (1, length_des))
+                if sum(feat) != 0: 
+                    des = np.vstack(des, feat)
+        else:    
+            des = np.zeros([num_des, length_des])
+    
+            for i in range(num_des):
+                des[i, :] = np.reshape(features[i, :, :], (1, length_des))
+            
+        method = getattr(sys.modules[__name__], 'useAverage')
         #TO DO: decide how to get the information from this layer
     #des must be a numpy array with rows corresponding to different descriptors
     return des
 
 #Extract features methods
-def extractFeaturesMaps(FLSubset, layer_taken, CNN_base_model, num_slots):
+def extractFeaturesMaps(FLSubset, layer_taken, CNN_base_model, num_slots, method_used):
     #Crop the model up to a certain layer
     CNN_new_model = Model(input=CNN_base_model.input, output=CNN_base_model.get_layer(layer_taken).output)
     
     #Shared data for pool
-    data = [layer_taken, CNN_base_model, CNN_new_model]
+    data = [layer_taken, CNN_base_model, CNN_new_model, method_used]
     
     pool = Pool(processes = num_slots, initializer = initPool, initargs = [data])
     deslab = pool.map(getFeaturesAndLabelsForImage, FLSubset)
@@ -45,30 +63,28 @@ def extractFeaturesMaps(FLSubset, layer_taken, CNN_base_model, num_slots):
 
     labels = [x[1] for x in deslab]
     Train_descriptors = [x[0] for x in deslab]
-
+    
     # Transform everything to numpy arrays
+    Train_label_per_descriptor = labels
     
     if layer_taken == 'fc1' or layer_taken == 'fc2' or layer_taken == 'flatten':
         #Not BoVW
-        Train_label_per_descriptor=labels
         D=Train_descriptors[0]
         for i in range(1,len(Train_descriptors)):
             D=np.vstack((D,Train_descriptors[i]))
     else:
+        
         size_descriptors = Train_descriptors[0].shape[1]
-        D = np.zeros((np.sum([len(p) for p in Train_descriptors]), size_descriptors), dtype=np.float32)
+        
+        D = np.zeros((np.sum([p.shape[0] for p in Train_descriptors]), size_descriptors), dtype=np.float32)
 
-        
         startingpoint = 0
-        Train_label_per_descriptor = np.array([labels[0]]*Train_descriptors[0].shape[0])
-        D[startingpoint:startingpoint + len(Train_descriptors[0])] = Train_descriptors[0]
-        startingpoint += len(Train_descriptors[0])
-        
-        for i in range(1,len(Train_descriptors)):
-            Train_label_per_descriptor = np.hstack((Train_label_per_descriptor,np.array([labels[i]]*Train_descriptors[i].shape[0])))
+                
+        for i in range(len(Train_descriptors)): 
             D[startingpoint:startingpoint + len(Train_descriptors[i])] = Train_descriptors[i]
             startingpoint += len(Train_descriptors[i])
-    
+            
+        
     return D, Train_descriptors, Train_label_per_descriptor
 
 def getFeaturesAndLabelsForImage((filename,label)):
@@ -76,13 +92,14 @@ def getFeaturesAndLabelsForImage((filename,label)):
     layer_taken = data[0]
     CNN_base_model = data[1]
     CNN_new_model = data[2]
+    method_used = data[3]
     
     img = image.load_img(filename, target_size=(224, 224))
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis = 0)
     x = preprocess_input(x)
 
-    des = getDescriptors(x, layer_taken, CNN_base_model, CNN_new_model)
+    des = getDescriptors(x, layer_taken, CNN_base_model, CNN_new_model, method_used)
 
     return (des, label)
 
