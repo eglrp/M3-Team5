@@ -68,10 +68,10 @@ def extractFeaturesMaps(FLSubset, layer_taken, CNN_base_model, method_used):
     Train_descriptors = [x[0] for x in deslab]
     
     # Transform everything to numpy arrays
-    
+    Train_label_per_descriptor = labels
     if layer_taken == 'fc1' or layer_taken == 'fc2' or layer_taken == 'flatten':
         #Not BoVW
-        Train_label_per_descriptor=labels
+        
         D=Train_descriptors[0]
         for i in range(1,len(Train_descriptors)):
             D=np.vstack((D,Train_descriptors[i]))
@@ -94,7 +94,8 @@ def getFeaturesAndLabelsForImage((filename,label)):
     layer_taken = data[0]
     CNN_base_model = data[1]
     CNN_new_model = data[2]
-    
+    method_used = data[3]
+	
     img = image.load_img(filename, target_size=(224, 224))
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis = 0)
