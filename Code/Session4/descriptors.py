@@ -25,13 +25,13 @@ def getDescriptors(x, layer_taken, CNN_base_model, CNN_new_model, method_used):
         #Extract features from last layer
         des=CNN_new_model.predict(x)
     elif layer_taken == 'block5_pool':
-        clear_zeros = method_used['clear_zeros']
+        clear_zeros = method_used['clear_zero_features']
         #From block5_pool layer we get a matrix of dim (512, 7, 7)
         features = CNN_new_model.predict(x)
         features = np.squeeze(features, axis = 0)
         num_des = features.shape[0]
         length_des = features.shape[1]*features.shape[2]
-        if method_used['clear_zero_features']:
+        if clear_zeros:
             des = np.reshape(features[0, :, :], (1, length_des))
     
             for i in range(1, num_des):
