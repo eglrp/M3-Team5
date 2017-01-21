@@ -16,9 +16,17 @@ def trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linea
 
     return clf,stdSlr
 
-def predictBoVW(Split, layer_taken, stdSlr, codebook, k, CNN_base_model, num_slots):
+def predictBoVW(Split, layer_taken, stdSlr, codebook, k, CNN_base_model, num_slots,pca):
     #Compute features
     D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeaturesMaps(Split, layer_taken, CNN_base_model, num_slots)
+    
+    if pca != None:
+        D = pca.transform(D)
+        
+        for idx,TrainDes in enumerate(Train_descriptors):        
+            train_descriptor = pca.transform(TrainDes)
+            Train_descriptors[idx]=train_descriptor
+                             
     #Determine visual words
     visual_words_test = BoW.getVisualWords(codebook, k, Train_descriptors)
 

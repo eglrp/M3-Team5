@@ -3,9 +3,9 @@ import sys
 sys.path.append('.')
 
 import time
-import SVMClassifiers, Evaluation, dataUtils,BoW, descriptors
+import SVMClassifiers, Evaluation, dataUtils,BoW, descriptors, PCA_computing
 
-def launchsession4(num_slots, layer_taken, randomSplits, k, useServer):
+def launchsession4(num_slots, layer_taken, randomSplits, k, useServer,usePCA):
     start = time.time()
     
     # Read the train and test files
@@ -33,6 +33,12 @@ def launchsession4(num_slots, layer_taken, randomSplits, k, useServer):
     print 'Extracting features'
     D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeaturesMaps(TrainingSplit, layer_taken, CNN_base_model, num_slots)
     
+    if usePCA>0:
+        print 'Applying PCA'
+        D, Train_descriptors, pca = PCA_computing.PCA_to_data(D, Train_descriptors, usePCA)
+    else:
+        pca = None
+
     if layer_taken == 'fc1' or layer_taken == 'fc2' or layer_taken == 'flatten':
         visual_words = D
         codebook = None
@@ -54,7 +60,7 @@ def launchsession4(num_slots, layer_taken, randomSplits, k, useServer):
         print 'Final test accuracy: ' + str(accuracy)
     else:
         #BoVW
-        predictedLabels=SVMClassifiers.predictBoVW(TestSplit, layer_taken, stdSlr, codebook, k, CNN_base_model, num_slots)
+        predictedLabels=SVMClassifiers.predictBoVW(TestSplit, layer_taken, stdSlr, codebook, k, CNN_base_model, num_slots,pca)
         accuracy = Evaluation.getMeanAccuracy(clf,predictedLabels,test_labels)
         print 'Final test accuracy: ' + str(accuracy)
 
@@ -67,7 +73,7 @@ def launchsession4(num_slots, layer_taken, randomSplits, k, useServer):
     else:
         #BoVW
         validation_images_filenames, validation_labels = dataUtils.unzipTupleList(ValidationSplit)
-        predictedLabels = SVMClassifiers.predictBoVW(ValidationSplit, layer_taken, stdSlr, codebook, k,CNN_base_model, num_slots)
+        predictedLabels = SVMClassifiers.predictBoVW(ValidationSplit, layer_taken, stdSlr, codebook, k,CNN_base_model, num_slots,pca)
         validation_accuracy = Evaluation.getMeanAccuracy(clf,predictedLabels,validation_labels)
         print 'Final validation accuracy: ' + str(validation_accuracy)
 
@@ -83,6 +89,7 @@ if __name__ == '__main__':
     method_used = {'layer_taken':'block5_pool', 'method_t_reduce_dim': 'average', 'Remaining_features':100}
     layer_taken = "block5_pool"# Layer
     k = 512 #Centroids for BoVW codebook
-
+    usePCA=0
+    
     print "Taking layer %s , randomSplits = %s, k-means centroids: %s" % (layer_taken, randomSplits, k)
-    launchsession4(num_slots, layer_taken, randomSplits, k, useServer)
+    launchsession4(num_slots, layer_taken, randomSplits, k, useServer,usePCA)
