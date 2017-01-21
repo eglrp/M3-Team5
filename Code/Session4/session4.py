@@ -37,17 +37,16 @@ def launchsession4(num_slots, layer_taken, randomSplits, k, useServer, method_us
     #Compute features
     print 'Extracting features'
     D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeaturesMaps(TrainingSplit, layer_taken, CNN_base_model, num_slots, method_used)
-    
-    if  method_used['usePCA'] > 0:
-        print 'Applying PCA'
-        D, Train_descriptors, pca = PCA_computing.PCA_to_data(D, Train_descriptors, method_used['usePCA'])
-    else:
-        pca = None
 
     if layer_taken == 'fc1' or layer_taken == 'fc2' or layer_taken == 'flatten':
         visual_words = D
         codebook = None
     else:
+        if method_used['usePCA'] > 0:
+            print 'Applying PCA'
+            D, Train_descriptors, pca = PCA_computing.PCA_to_data(D, Train_descriptors, method_used['usePCA'])
+        else:
+            pca = None
         #Computing bag of words using k-means and save codebook when necessary
         codebook = BoW.computeCodebook(D, k)
         #Determine visual words
