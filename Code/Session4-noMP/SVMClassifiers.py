@@ -1,7 +1,6 @@
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from sklearn import svm
-from multiprocessing import Pool
 import descriptors,BoW
 
 from keras.models import Model
@@ -16,42 +15,27 @@ def trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linea
 
     return clf,stdSlr
 
-<<<<<<< HEAD
-def predictBoVW(Split, layer_taken, stdSlr, codebook, k, CNN_base_model, num_slots,pca):
+def predictBoVW(Split, layer_taken, stdSlr, codebook, k, CNN_base_model):
     #Compute features
-    D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeaturesMaps(Split, layer_taken, CNN_base_model, num_slots)
-    
-    if pca != None:
-        D = pca.transform(D)
-        
-        for idx,TrainDes in enumerate(Train_descriptors):        
-            train_descriptor = pca.transform(TrainDes)
-            Train_descriptors[idx]=train_descriptor
-                             
-=======
-def predictBoVW(Split, layer_taken, stdSlr, codebook, k, CNN_base_model, num_slots, method_used):
-    #Compute features
-    D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeaturesMaps(Split, layer_taken, CNN_base_model, num_slots, method_used)
->>>>>>> 1fbc031b361b5ab9ac9d88672d1b27a00c612381
+    D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeaturesMaps(Split, layer_taken, CNN_base_model)
     #Determine visual words
     visual_words_test = BoW.getVisualWords(codebook, k, Train_descriptors)
-    #Apply PCA
+
     predictedLabels = stdSlr.transform(visual_words_test)
     
     return predictedLabels
 
-def predict(Split, layer_taken, stdSlr, clf, CNN_base_model, num_slots):
+def predict(Split, layer_taken, stdSlr, clf, CNN_base_model):
     #Compute features
     CNN_new_model = Model(input=CNN_base_model.input, output=CNN_base_model.get_layer(layer_taken).output)
     
     data = [layer_taken,clf,stdSlr,CNN_base_model,CNN_new_model]#shared data with processes
+    initPool(data)
     
-    pool = Pool(processes=4,initializer=initPool, initargs=[data])
-    predictedClasses= pool.map(getPredictionForImage, Split)
-    pool.terminate()
-    
-    predictions=[str(x) for x in predictedClasses]
-    
+    predictions=[]
+    for filelabel in Split:
+        predictions.append(str(getPredictionForImage(filelabel)))
+
     return predictions
 
 def getPredictionForImage((filename,label)):
