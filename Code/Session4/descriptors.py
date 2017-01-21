@@ -17,8 +17,16 @@ def getDescriptors(x, layer_taken, CNN_base_model, CNN_new_model):
         #Extract features from last layer
         des=CNN_new_model.predict(x)
     elif layer_taken == 'block5_pool':
-        des = np.array([0, 0])
-        
+        #From block5 pool layer we get a matrix of dim (512, 7, 7)
+        features = CNN_new_model.predict(x)
+        features = np.squeeze(features, axis = 0)
+        des = np.zeros([512, 49])
+        zeros = 0
+        for i in range(512):
+            des[i, :] = np.reshape(features[i, :, :], (1, 49))
+            if sum(des[i, :]) == 0.0:
+                zeros += 1
+        print zeros
         #TO DO: decide how to get the information from this layer
     #des must be a numpy array with rows corresponding to different descriptors
     return des
@@ -37,10 +45,7 @@ def extractFeaturesMaps(FLSubset, layer_taken, CNN_base_model, num_slots):
 
     labels = [x[1] for x in deslab]
     Train_descriptors = [x[0] for x in deslab]
-    #print Train_descriptors[0]
-    #print len(Train_descriptors[0])
-    #print type(Train_descriptors)
-    #print type(Train_descriptors[0])
+
     # Transform everything to numpy arrays
     
     if layer_taken == 'fc1' or layer_taken == 'fc2' or layer_taken == 'flatten':
@@ -52,7 +57,7 @@ def extractFeaturesMaps(FLSubset, layer_taken, CNN_base_model, num_slots):
     else:
         size_descriptors = Train_descriptors[0].shape[1]
         D = np.zeros((np.sum([len(p) for p in Train_descriptors]), size_descriptors), dtype=np.float32)
-        #print D.shape
+
         
         startingpoint = 0
         Train_label_per_descriptor = np.array([labels[0]]*Train_descriptors[0].shape[0])

@@ -29,7 +29,7 @@ plt.imshow(img)
 plt.show()
 
 #crop the model up to a certain layer
-model = Model(input=base_model.input, output=base_model.get_layer('block5_conv2').output)
+model = Model(input=base_model.input, output=base_model.get_layer('block5_pool').output)
 #get the features from images
 features = model.predict(x)
 
@@ -37,4 +37,4 @@ features = model.predict(x)
     #theano and thensorflow deal with tensor in different order
 
 
-weights = base_model.get_layer('block1_conv1').get_weights()
+weights = base_model.get_layer('block5_pool').get_weights()

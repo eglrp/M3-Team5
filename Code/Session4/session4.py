@@ -15,10 +15,10 @@ def launchsession4(num_slots, layer_taken, randomSplits, k, useServer):
         train_images_filenames, test_images_filenames, train_labels, test_labels = dataUtils.readData()
     
     #For testing with smaller database
-    #train_images_filenames=train_images_filenames[:300]
-    #test_images_filenames=test_images_filenames[:300]
-    #train_labels=train_labels[:300]
-    #test_labels=test_labels[:300]
+    train_images_filenames=train_images_filenames[:300]
+    test_images_filenames=test_images_filenames[:300]
+    train_labels=train_labels[:300]
+    test_labels=test_labels[:300]
     
     #Divide training into training and validation splits
     train_percentage = 0.7 #70% training 30%validation
@@ -30,6 +30,7 @@ def launchsession4(num_slots, layer_taken, randomSplits, k, useServer):
     #Obtain information from VGG ConvNet
     CNN_base_model = descriptors.getBaseModel()#Base model
     #Compute features
+    print 'Extracting features'
     D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeaturesMaps(TrainingSplit, layer_taken, CNN_base_model, num_slots)
     
     if layer_taken == 'fc1' or layer_taken == 'fc2' or layer_taken == 'flatten':
@@ -40,7 +41,7 @@ def launchsession4(num_slots, layer_taken, randomSplits, k, useServer):
         codebook=BoW.computeCodebook(D,k)
         #Determine visual words
         visual_words = BoW.getVisualWords(codebook, k, Train_descriptors)
-    
+
     # Train a linear SVM classifier
     clf, stdSlr = SVMClassifiers.trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linear')
 
@@ -78,8 +79,9 @@ if __name__ == '__main__':
     num_slots = 4
     randomSplits = False
     useServer=False
-
-    layer_taken = "fc2"# Layer
+    method_used = {'layer_taken':'block5_pool', 'method_t_reduce_dim': 'PCA', 'Value_PCA':90}
+    method_used = {'layer_taken':'block5_pool', 'method_t_reduce_dim': 'average', 'Remaining_features':100}
+    layer_taken = "block5_pool"# Layer
     k = 512 #Centroids for BoVW codebook
 
     print "Taking layer %s , randomSplits = %s, k-means centroids: %s" % (layer_taken, randomSplits, k)
