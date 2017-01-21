@@ -29,7 +29,7 @@ def predictBoVW(Split, layer_taken, stdSlr, codebook, k, CNN_base_model, num_slo
                              
     #Determine visual words
     visual_words_test = BoW.getVisualWords(codebook, k, Train_descriptors)
-    #Apply PCA
+    
     predictedLabels = stdSlr.transform(visual_words_test)
     
     return predictedLabels

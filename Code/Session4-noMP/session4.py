@@ -3,10 +3,12 @@ import sys
 sys.path.append('.')
 
 import time
-import SVMClassifiers, Evaluation, dataUtils,BoW, descriptors
+import SVMClassifiers, Evaluation, dataUtils,BoW, descriptors, PCA_computing
 
-def launchsession4(layer_taken, randomSplits, k, useServer):
-    start = time.time()
+
+def launchsession4(layer_taken, randomSplits, k, useServer, method_used):
+    
+	start = time.time()
     
     # Read the train and test files
     if useServer:
@@ -15,10 +17,11 @@ def launchsession4(layer_taken, randomSplits, k, useServer):
         train_images_filenames, test_images_filenames, train_labels, test_labels = dataUtils.readData()
     
     #For testing with smaller database
-    #train_images_filenames=train_images_filenames[:300]
-    #test_images_filenames=test_images_filenames[:300]
-    #train_labels=train_labels[:300]
-    #test_labels=test_labels[:300]
+#    rr = 300
+#    train_images_filenames=train_images_filenames[:rr]
+#    test_images_filenames=test_images_filenames[:rr]
+#    train_labels=train_labels[:rr]
+#    test_labels=test_labels[:rr]
     
     #Divide training into training and validation splits
     train_percentage = 0.7 #70% training 30%validation
@@ -29,13 +32,21 @@ def launchsession4(layer_taken, randomSplits, k, useServer):
     
     #Obtain information from VGG ConvNet
     CNN_base_model = descriptors.getBaseModel()#Base model
+	
+	
     #Compute features
-    D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeaturesMaps(TrainingSplit, layer_taken, CNN_base_model)
+	print 'Extracting features'
+    D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeaturesMaps(TrainingSplit, layer_taken, CNN_base_model, method_used)
     
     if layer_taken == 'fc1' or layer_taken == 'fc2' or layer_taken == 'flatten':
         visual_words = D
         codebook = None
     else:
+		if method_used['usePCA'] > 0:
+            print 'Applying PCA'
+            D, Train_descriptors, pca = PCA_computing.PCA_to_data(D, Train_descriptors, method_used['usePCA'])
+        else:
+            pca = None
         #Computing bag of words using k-means and save codebook when necessary
         codebook=BoW.computeCodebook(D,k)
         #Determine visual words
@@ -53,7 +64,7 @@ def launchsession4(layer_taken, randomSplits, k, useServer):
         print 'Final test accuracy: ' + str(accuracy)
     else:
         #BoVW
-        predictedLabels=SVMClassifiers.predictBoVW(TestSplit, layer_taken, stdSlr, codebook, k, CNN_base_model)
+        predictedLabels=SVMClassifiers.predictBoVW(TestSplit, layer_taken, stdSlr, codebook, k, CNN_base_model, pca , method_used)
         accuracy = Evaluation.getMeanAccuracy(clf,predictedLabels,test_labels)
         print 'Final test accuracy: ' + str(accuracy)
 
@@ -66,7 +77,7 @@ def launchsession4(layer_taken, randomSplits, k, useServer):
         print 'Final validation accuracy: ' + str(validation_accuracy)
     else:
         #BoVW
-        predictedLabels = SVMClassifiers.predictBoVW(ValidationSplit, layer_taken, stdSlr, codebook, k,CNN_base_model)
+        predictedLabels = SVMClassifiers.predictBoVW(ValidationSplit, layer_taken, stdSlr, codebook, k,CNN_base_model, pca ,method_used)
         validation_accuracy = Evaluation.getMeanAccuracy(clf,predictedLabels,validation_labels)
         print 'Final validation accuracy: ' + str(validation_accuracy)
 
@@ -75,11 +86,14 @@ def launchsession4(layer_taken, randomSplits, k, useServer):
 
 
 if __name__ == '__main__':
+    
     randomSplits = False
-    useServer=True
+    useServer=False
 
-    layer_taken = "fc2"# Layer
-    k = 512 #Centroids for BoVW codebook
+    method_used = {'method_to_reduce_dim': 'Nothing', 'Remaining_features': 100, 'clear_zero_features': True, 'usePCA': 10}
+    layer_taken = "block5_pool"# Layer
+
+    k = 128 #Centroids for BoVW codebook
 
     print "Taking layer %s , randomSplits = %s, k-means centroids: %s" % (layer_taken, randomSplits, k)
-    launchsession4(layer_taken, randomSplits, k, useServer)
+    launchsession4(layer_taken, randomSplits, k, useServer, method_used)

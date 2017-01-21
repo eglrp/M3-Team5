@@ -24,7 +24,7 @@ def launchsession4(num_slots, layer_taken, randomSplits, k, useServer, method_us
     test_labels=test_labels[:rr]
     
     #Divide training into training and validation splits
-    train_percentage = 0.7 #70% training 30%validation
+    train_percentage = 0.7 #70% training 30% validation
     if randomSplits:
         TrainingSplit, ValidationSplit=dataUtils.getRandomTrainingValidationSplit(train_images_filenames,train_labels,train_percentage)
     else:
@@ -33,7 +33,7 @@ def launchsession4(num_slots, layer_taken, randomSplits, k, useServer, method_us
     #Obtain information from VGG ConvNet
     CNN_base_model = descriptors.getBaseModel()#Base model
     
-                                             
+    
     #Compute features
     print 'Extracting features'
     D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeaturesMaps(TrainingSplit, layer_taken, CNN_base_model, num_slots, method_used)
@@ -97,7 +97,7 @@ if __name__ == '__main__':
     randomSplits = False
     useServer=False
 
-    method_used = {'method_to_reduce_dim': 'Nothing', 'Remaining_features': 100, 'clear_zero_features': True, 'usePCA': 30}
+    method_used = {'method_to_reduce_dim': 'Nothing', 'Remaining_features': 100, 'clear_zero_features': True, 'usePCA': 10}
     layer_taken = "block5_pool"# Layer
 
     k = 128 #Centroids for BoVW codebook
