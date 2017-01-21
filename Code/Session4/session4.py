@@ -3,9 +3,13 @@ import sys
 sys.path.append('.')
 
 import time
-import SVMClassifiers, Evaluation, dataUtils,BoW, descriptors
+import SVMClassifiers, Evaluation, dataUtils,BoW, descriptors, PCA_computing
 
+<<<<<<< HEAD
+def launchsession4(num_slots, layer_taken, randomSplits, k, useServer,usePCA):
+=======
 def launchsession4(num_slots, layer_taken, randomSplits, k, useServer, method_used):
+>>>>>>> 1fbc031b361b5ab9ac9d88672d1b27a00c612381
     start = time.time()
     
     # Read the train and test files
@@ -34,6 +38,12 @@ def launchsession4(num_slots, layer_taken, randomSplits, k, useServer, method_us
     print 'Extracting features'
     D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeaturesMaps(TrainingSplit, layer_taken, CNN_base_model, num_slots, method_used)
     
+    if usePCA>0:
+        print 'Applying PCA'
+        D, Train_descriptors, pca = PCA_computing.PCA_to_data(D, Train_descriptors, usePCA)
+    else:
+        pca = None
+
     if layer_taken == 'fc1' or layer_taken == 'fc2' or layer_taken == 'flatten':
         visual_words = D
         codebook = None
@@ -56,7 +66,11 @@ def launchsession4(num_slots, layer_taken, randomSplits, k, useServer, method_us
         print 'Final test accuracy: ' + str(accuracy)
     else:
         #BoVW
+<<<<<<< HEAD
+        predictedLabels=SVMClassifiers.predictBoVW(TestSplit, layer_taken, stdSlr, codebook, k, CNN_base_model, num_slots,pca)
+=======
         predictedLabels=SVMClassifiers.predictBoVW(TestSplit, layer_taken, stdSlr, codebook, k, CNN_base_model, num_slots, method_used)
+>>>>>>> 1fbc031b361b5ab9ac9d88672d1b27a00c612381
         accuracy = Evaluation.getMeanAccuracy(clf,predictedLabels,test_labels)
         print 'Final test accuracy: ' + str(accuracy)
 
@@ -74,9 +88,19 @@ def launchsession4(num_slots, layer_taken, randomSplits, k, useServer, method_us
     else:
         #BoVW
         validation_images_filenames, validation_labels = dataUtils.unzipTupleList(ValidationSplit)
+<<<<<<< HEAD
+        predictedLabels = SVMClassifiers.predictBoVW(ValidationSplit, layer_taken, stdSlr, codebook, k,CNN_base_model, num_slots,pca)
+=======
         predictedLabels = SVMClassifiers.predictBoVW(ValidationSplit, layer_taken, stdSlr, codebook, k,CNN_base_model, num_slots, method_used)
+<<<<<<< HEAD
 
 
+=======
+=======
+        predictedLabels = SVMClassifiers.predictBoVW(ValidationSplit, layer_taken, stdSlr, codebook, k,CNN_base_model, num_slots)
+>>>>>>> afa2cde972edae148ceaf3c903da3529f67c6cef
+>>>>>>> 1fbc031b361b5ab9ac9d88672d1b27a00c612381
+>>>>>>> 47cc7721789a3b03436d51cc136a761e2dd44e8c
         validation_accuracy = Evaluation.getMeanAccuracy(clf,predictedLabels,validation_labels)
         print 'Final validation accuracy: ' + str(validation_accuracy)
 
@@ -91,7 +115,15 @@ if __name__ == '__main__':
 
     method_used = {'method_to_reduce_dim': 'Average', 'Remaining_features': 100, 'clear_zero_features': True, 'usePCA': 90}
     layer_taken = "block5_pool"# Layer
+<<<<<<< HEAD
+    k = 512 #Centroids for BoVW codebook
+    usePCA=0
+    
+    print "Taking layer %s , randomSplits = %s, k-means centroids: %s" % (layer_taken, randomSplits, k)
+    launchsession4(num_slots, layer_taken, randomSplits, k, useServer,usePCA)
+=======
     k = 128 #Centroids for BoVW codebook
 
     print "Taking layer %s , randomSplits = %s, k-means centroids: %s" % (layer_taken, randomSplits, k)
     launchsession4(num_slots, layer_taken, randomSplits, k, useServer, method_used)
+>>>>>>> 1fbc031b361b5ab9ac9d88672d1b27a00c612381
