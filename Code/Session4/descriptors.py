@@ -46,7 +46,7 @@ def getDescriptors(x, layer_taken, CNN_base_model, CNN_new_model, method_used):
         if method_used['method_to_reduce_dim'] != 'Nothing':   
             method = getattr(sys.modules[__name__], 'use' + method_used['method_to_reduce_dim'])
             des = method(des, method_used['Remaining_features'])
-        #TO DO: decide how to get the information from this layer
+        
     #des must be a numpy array with rows corresponding to different descriptors
     return des
 

@@ -16,10 +16,9 @@ def trainSVM(visual_words,Train_label_per_descriptor,Cparam=1,kernel_type='linea
 
     return clf,stdSlr
 
-<<<<<<< HEAD
-def predictBoVW(Split, layer_taken, stdSlr, codebook, k, CNN_base_model, num_slots,pca):
+def predictBoVW(Split, layer_taken, stdSlr, codebook, k, CNN_base_model, num_slots, pca , method_used):
     #Compute features
-    D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeaturesMaps(Split, layer_taken, CNN_base_model, num_slots)
+    D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeaturesMaps(Split, layer_taken, CNN_base_model, num_slots, method_used)
     
     if pca != None:
         D = pca.transform(D)
@@ -28,11 +27,6 @@ def predictBoVW(Split, layer_taken, stdSlr, codebook, k, CNN_base_model, num_slo
             train_descriptor = pca.transform(TrainDes)
             Train_descriptors[idx]=train_descriptor
                              
-=======
-def predictBoVW(Split, layer_taken, stdSlr, codebook, k, CNN_base_model, num_slots, method_used):
-    #Compute features
-    D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeaturesMaps(Split, layer_taken, CNN_base_model, num_slots, method_used)
->>>>>>> 1fbc031b361b5ab9ac9d88672d1b27a00c612381
     #Determine visual words
     visual_words_test = BoW.getVisualWords(codebook, k, Train_descriptors)
     #Apply PCA
