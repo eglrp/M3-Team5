@@ -33,11 +33,11 @@ def predictBoVW(Split, layer_taken, stdSlr, codebook, k, CNN_base_model, pca, me
     
     return predictedLabels
 
-def predict(Split, layer_taken, stdSlr, clf, CNN_base_model):
+def predict(Split, layer_taken, stdSlr, clf, CNN_base_model, method_used):
     #Compute features
     CNN_new_model = Model(input=CNN_base_model.input, output=CNN_base_model.get_layer(layer_taken).output)
     
-    data = [layer_taken,clf,stdSlr,CNN_base_model,CNN_new_model]#shared data with processes
+    data = [layer_taken,clf,stdSlr,CNN_base_model,CNN_new_model, method_used]#shared data with processes
     initPool(data)
     
     predictions=[]
@@ -52,8 +52,9 @@ def getPredictionForImage((filename,label)):
     computedstdSlr=data[2]
     CNN_base_model=data[3]
     CNN_new_model=data[4]
+    method_used = data[5]
     
-    descriptors.initPool([layer_taken,CNN_base_model,CNN_new_model])
+    descriptors.initPool([layer_taken, CNN_base_model, CNN_new_model, method_used])
     deslab=descriptors.getFeaturesAndLabelsForImage((filename,label))
     
     #Predict label

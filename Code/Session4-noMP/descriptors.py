@@ -15,24 +15,17 @@ def getBaseModel():
 
 def useAverage(des, output_descriptors):
     
-    if output_descriptors == 'all':
-        new_des = np.mean(des, axis = 0)
-    else:
-        new_des = new_des
-        
+    new_des = np.mean(des, axis = 0)
+      
     return new_des
 
 
 def useMax(des, output_descriptors):
     
-    if output_descriptors == 'all':
-        new_des = np.amax(des, axis = 0)
-    else:
-        new_des = new_des
+    new_des = np.amax(des, axis = 0)
         
     return new_des
         
-    return des
 
 def usePca(des, output_descriptors):
     
@@ -108,16 +101,21 @@ def extractFeaturesMaps(FLSubset, layer_taken, CNN_base_model, method_used):
         for i in range(1,len(Train_descriptors)):
             D=np.vstack((D,Train_descriptors[i]))
     else:
+        if method_used['method_to_reduce_dim'] == 'Average' or method_used['method_to_reduce_dim'] == 'Max':
+            D = Train_descriptors[0]
+            for i in range(1,len(Train_descriptors)):
+                D = np.vstack((D,Train_descriptors[i]))
+        else:    
+            
+            size_descriptors = Train_descriptors[0].shape[1]
         
-        size_descriptors = Train_descriptors[0].shape[1]
-        
-        D = np.zeros((np.sum([p.shape[0] for p in Train_descriptors]), size_descriptors), dtype=np.float32)
+            D = np.zeros((np.sum([p.shape[0] for p in Train_descriptors]), size_descriptors), dtype=np.float32)
 
-        startingpoint = 0
+            startingpoint = 0
                 
-        for i in range(len(Train_descriptors)): 
-            D[startingpoint:startingpoint + len(Train_descriptors[i])] = Train_descriptors[i]
-            startingpoint += len(Train_descriptors[i])
+            for i in range(len(Train_descriptors)): 
+                D[startingpoint:startingpoint + len(Train_descriptors[i])] = Train_descriptors[i]
+                startingpoint += len(Train_descriptors[i])
     
     return D, Train_descriptors, Train_label_per_descriptor
 
