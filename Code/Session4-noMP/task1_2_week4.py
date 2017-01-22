@@ -17,7 +17,7 @@ from sklearn.decomposition import PCA
 
 applyMean = False
 applyPca = False
-visualizingWeights = True
+visualizingWeights = False
 
 #load VGG model
 base_model = VGG16(weights='imagenet')
