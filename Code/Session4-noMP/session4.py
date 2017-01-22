@@ -88,7 +88,7 @@ if __name__ == '__main__':
     
     randomSplits = False
     useServer = True
-
+    #'Nothing', 'Average', 'Max', 'Pca'
     method_used = {'method_to_reduce_dim': 'Nothing', 'Remaining_features': 100, 'clear_zero_features': True, 'usePCA': 10}
     layer_taken = "block5_pool"# Layer
 

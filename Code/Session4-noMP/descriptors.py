@@ -7,6 +7,7 @@ from keras.applications.vgg16 import VGG16
 from keras.preprocessing import image
 from keras.applications.vgg19 import preprocess_input
 from keras.models import Model
+from sklearn.decomposition import PCA
 
 def getBaseModel():
     CNN_base_model = VGG16(weights='imagenet')
@@ -14,8 +15,38 @@ def getBaseModel():
 
 def useAverage(des, output_descriptors):
     
+    if output_descriptors == 'all':
+        new_des = np.mean(des, axis = 0)
+    else:
+        new_des = new_des
+        
+    return new_des
+
+
+def useMax(des, output_descriptors):
+    
+    if output_descriptors == 'all':
+        new_des = np.amax(des, axis = 0)
+    else:
+        new_des = new_des
+        
+    return new_des
         
     return des
+
+def usePca(des, output_descriptors):
+    des_transposed = des.transposed(1, 0)
+    
+    pca = PCA(n_components = output_descriptors)
+    
+    pca.fit(des_transposed)
+    new_des_T = pca.transform(des_transposed)
+    
+    new_des = new_des_T.transposed(1, 0)
+        
+    return new_des
+
+
 def getDescriptors(x, layer_taken, CNN_base_model, CNN_new_model, method_used):
     #Descriptors depending on the chosen layer
     if layer_taken == 'fc2' or layer_taken == 'fc1':
