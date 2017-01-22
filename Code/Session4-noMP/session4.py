@@ -36,8 +36,8 @@ def launchsession4(layer_taken, randomSplits, k, useServer, method_used):
     #Compute features
     print 'Extracting features'
     D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeaturesMaps(TrainingSplit, layer_taken, CNN_base_model, method_used)
-    
-    if layer_taken == 'fc1' or layer_taken == 'fc2' or layer_taken == 'flatten':
+    not_use_BoW_other_layers = method_used['method_to_reduce_dim'] == 'Average' or method_used['method_to_reduce_dim'] == 'Max'
+    if layer_taken == 'fc1' or layer_taken == 'fc2' or layer_taken == 'flatten' or  not_use_BoW_other_layers:
         visual_words = D
         codebook = None
     else:
@@ -56,9 +56,9 @@ def launchsession4(layer_taken, randomSplits, k, useServer, method_used):
 
     #For test set
     TestSplit=zip(test_images_filenames,test_labels)
-    if layer_taken == 'fc1' or layer_taken == 'fc2' or layer_taken == 'flatten':
+    if layer_taken == 'fc1' or layer_taken == 'fc2' or layer_taken == 'flatten' or not_use_BoW_other_layers:
         ##Not using BoVW
-        predictedLabels=SVMClassifiers.predict(TestSplit, layer_taken, stdSlr, clf, CNN_base_model)
+        predictedLabels=SVMClassifiers.predict(TestSplit, layer_taken, stdSlr, clf, CNN_base_model, method_used)
         accuracy = Evaluation.computeAccuracyOld(predictedLabels,test_labels)
         print 'Final test accuracy: ' + str(accuracy)
     else:
@@ -69,9 +69,9 @@ def launchsession4(layer_taken, randomSplits, k, useServer, method_used):
 
     #For validation set
     validation_images_filenames, validation_labels = dataUtils.unzipTupleList(ValidationSplit)
-    if layer_taken == 'fc1' or layer_taken == 'fc2' or layer_taken == 'flatten':
+    if layer_taken == 'fc1' or layer_taken == 'fc2' or layer_taken == 'flatten' or not_use_BoW_other_layers:
         #Not using BoVW
-        predictedLabels=SVMClassifiers.predict(ValidationSplit, layer_taken, stdSlr, clf, CNN_base_model)
+        predictedLabels=SVMClassifiers.predict(ValidationSplit, layer_taken, stdSlr, clf, CNN_base_model, method_used)
         validation_accuracy = Evaluation.computeAccuracyOld(predictedLabels,validation_labels)
         print 'Final validation accuracy: ' + str(validation_accuracy)
     else:
@@ -89,11 +89,14 @@ if __name__ == '__main__':
     randomSplits = False
     useServer = True
     #'Nothing', 'Average', 'Max', 'Pca'
-    method_used = {'method_to_reduce_dim': 'Nothing', 'Remaining_features': 100, 'clear_zero_features': True, 'usePCA': 10}
-    layer_taken = "block5_pool"# Layer
+    method_used = {'method_to_reduce_dim': 'Average', 'Remaining_features': 100, 'clear_zero_features': True, 'usePCA': 10}
+    layer_taken = "fc1"# Layer
 
     k = 128 #Centroids for BoVW codebook
 
     print "Taking layer %s , randomSplits = %s, k-means centroids: %s" % (layer_taken, randomSplits, k)
-    print "Method to reduce dimension: %s, Remaining features: %s, Clear zeros features = %s, Apply PCA: %s " %(method_used['method_to_reduce_dim'], method_used['Remaining_features'], method_used['clear_zero_features'], method_used['usePCA'])
+    if method_used['method_to_reduce_dim'] == 'Pca':
+      print "Method to reduce dimension: %s, Remaining features: %s, Clear zeros features = %s, Apply PCA: %s " %(method_used['method_to_reduce_dim'], method_used['Remaining_features'], method_used['clear_zero_features'], method_used['usePCA'])
+    else:
+      print "Method to reduce dimension: %s, Clear zeros features = %s, Apply PCA: %s " %(method_used['method_to_reduce_dim'], method_used['clear_zero_features'], method_used['usePCA'])
     launchsession4(layer_taken, randomSplits, k, useServer, method_used)
