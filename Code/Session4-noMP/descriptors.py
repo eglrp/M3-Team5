@@ -46,7 +46,7 @@ def getDescriptors(x, layer_taken, CNN_base_model, CNN_new_model, method_used):
     if layer_taken == 'fc2' or layer_taken == 'fc1':
         #Extract features from last layer
         des=CNN_new_model.predict(x)
-    elif layer_taken == 'block5_pool':
+    else:
         clear_zeros = method_used['clear_zero_features']
         
         #From block5_pool layer we get a matrix of dim (512, 7, 7)
