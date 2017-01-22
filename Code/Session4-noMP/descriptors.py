@@ -1,6 +1,6 @@
 
 import numpy as np
-from multiprocessing import Pool
+#from multiprocessing import Pool
 import sys
 
 from keras.applications.vgg16 import VGG16
@@ -77,7 +77,7 @@ def extractFeaturesMaps(FLSubset, layer_taken, CNN_base_model, method_used):
             D=np.vstack((D,Train_descriptors[i]))
     else:
         
-		size_descriptors = Train_descriptors[0].shape[1]
+        size_descriptors = Train_descriptors[0].shape[1]
         
         D = np.zeros((np.sum([p.shape[0] for p in Train_descriptors]), size_descriptors), dtype=np.float32)
 
@@ -90,7 +90,7 @@ def extractFeaturesMaps(FLSubset, layer_taken, CNN_base_model, method_used):
     return D, Train_descriptors, Train_label_per_descriptor
 
 def getFeaturesAndLabelsForImage((filename,label)):
-    print 'Reading image ' + filename + ' with label ' + label
+#    print 'Reading image ' + filename + ' with label ' + label
     layer_taken = data[0]
     CNN_base_model = data[1]
     CNN_new_model = data[2]

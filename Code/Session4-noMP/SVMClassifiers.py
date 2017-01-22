@@ -19,7 +19,7 @@ def predictBoVW(Split, layer_taken, stdSlr, codebook, k, CNN_base_model, pca, me
     #Compute features
     D, Train_descriptors, Train_label_per_descriptor = descriptors.extractFeaturesMaps(Split, layer_taken, CNN_base_model, method_used)
     
-	if pca != None:
+    if pca != None:
         D = pca.transform(D)
         
         for idx,TrainDes in enumerate(Train_descriptors):        
