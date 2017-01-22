@@ -35,14 +35,15 @@ def useMax(des, output_descriptors):
     return des
 
 def usePca(des, output_descriptors):
-    des_transposed = des.transposed(1, 0)
+    
+    des_transposed = np.transpose(des)
     
     pca = PCA(n_components = output_descriptors)
     
     pca.fit(des_transposed)
     new_des_T = pca.transform(des_transposed)
     
-    new_des = new_des_T.transposed(1, 0)
+    new_des = np.transpose(new_des_T)
         
     return new_des
 
