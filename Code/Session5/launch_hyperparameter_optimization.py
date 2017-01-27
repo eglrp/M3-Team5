@@ -37,6 +37,7 @@ if __name__ == '__main__':
     
     #TODO:
     #This should be random search
+
 #    , bs, samples_per_epoch, nb_epoch
     for i in range(nb_random_trials):
         hyper_parameters = {}
@@ -90,3 +91,4 @@ if __name__ == '__main__':
 #drop-out layers: p % of inactive weights
 #batchnormalization
 #regularizers
+

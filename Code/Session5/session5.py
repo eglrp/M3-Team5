@@ -9,7 +9,8 @@ def launchsession5(useServer, useBlock4, batch_size, samples_per_epoch, nb_epoch
     #Get data
     dataUtils.createDataPaths(useServer,0.7)
     datagen = CNNData.getDataGenerator()
-    train_generator, validation_generator, test_generator = CNNData.getData(datagen, batch_size)
+    augmented_datagen = CNNData.getAugmentedDataGenerator()
+    train_generator, validation_generator, test_generator = CNNData.getData(datagen, augmented_datagen, batch_size)
     
     #Create model
     if useBlock4:
@@ -23,11 +24,14 @@ def launchsession5(useServer, useBlock4, batch_size, samples_per_epoch, nb_epoch
     
     #Evaluate the model
     CNNModel.plotModelPerformance(history)
-    result = CNNModel.evaluateModel(model, test_generator)
+    val_result = CNNModel.evaluateModel(model, validation_generator)
+    test_result = CNNModel.evaluateModel(model, test_generator)
     
-    print result
+    print 'Validation result ' + str(val_result)
+    print 'Test result ' + str(test_result)
     
-    return result, history
+    return val_result, history
+
 
 
 if __name__ == '__main__':
