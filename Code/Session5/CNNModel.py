@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from keras.applications.vgg16 import VGG16
 from keras.models import Model
 from keras.layers import Dense, Dropout, Flatten
+from keras.layers.normalization import BatchNormalization
 
 def getBaseModel():
     base_model = VGG16(weights='imagenet')
@@ -14,11 +15,22 @@ def getBaseModel():
     return base_model
 
 #Option 1: Change 1000 softmax by a 8 softmax
-def createModel():
+def createModel(hyper_parameters):
     base_model = getBaseModel()
     
     #Get last but one layer output and add a new layer of 8 predictions
     x = base_model.layers[-2].output
+                         
+    # Add Dropout layer
+    if hyper_parameters.get('dropout') == True:
+        x = Dropout(hyper_parameters.get('dropout_value'))(x)
+    # Add Batch normalization layer
+    if hyper_parameters.get('batch_normalization') == True:
+        x = BatchNormalization(epsilon=0.001, mode=0, axis=-1,
+            momentum=0.99, weights=None, beta_init='zero',
+            gamma_init='one', gamma_regularizer=None,
+            beta_regularizer=None)(x)
+
     x = Dense(8, activation='softmax', name='predictions')(x)
     model = Model(input=base_model.input, output=x)
     

@@ -21,7 +21,7 @@ def launchsession5(useServer, useBlock4, hyper_parameters):
     if useBlock4:
         model = CNNModel.createModelBlock4()
     else:
-        model = CNNModel.createModel()
+        model = CNNModel.createModel(hyper_parameters)
     
     # Usage of optimizers
     if hyper_parameters.get('optimizer') == 'sgd':
