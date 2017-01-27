@@ -2,9 +2,9 @@
 import sys
 sys.path.append('.')
 
-import session5
-import numpy as np
+import session5,CNNOptimizers
 from numpy import random
+
 if __name__ == '__main__':
     
     useServer = True
@@ -60,17 +60,22 @@ if __name__ == '__main__':
             hyper_parameters['decay_value'] = (decay_range[1] - decay_range[0]) * random.random_sample() + decay_range[0]
             hyper_parameters['nesterov_momentum'] = random.choice(nesterov)
             
+            optimizerObject=CNNOptimizers.getOptimizer(optimizer,hyper_parameters.get('learning_rate'),decay_value=hyper_parameters.get('decay_value'),momentum_value=hyper_parameters.get('momentum_value'),nesterov_momentum=hyper_parameters.get('nesterov_momentum'))
+            
         elif optimizer == 'adagrad':
             
             hyper_parameters['epsilon_value'] = (epsilon_range_adagrad[1] - epsilon_range_adagrad[0]) * random.random_sample() + epsilon_range_adagrad[0]
             hyper_parameters['rho_value'] = (rho_range[1] - rho_range[0]) * random.random_sample() + rho_range[0]
         
+            optimizerObject=CNNOptimizers.getOptimizer(optimizer,hyper_parameters.get('learning_rate'),rho_value=hyper_parameters.get('rho_value'),epsilon_value=hyper_parameters.get('epsilon_value'))
+        
         elif optimizer == 'adadelta':   
             hyper_parameters['epsilon_value'] = (epsilon_range_adadelta[1] - epsilon_range_adadelta[0]) * random.random_sample() + epsilon_range_adadelta[0]
+            
+            optimizerObject=CNNOptimizers.getOptimizer(optimizer,hyper_parameters.get('learning_rate'), epsilon_value=hyper_parameters.get('epsilon_value'))
         
-        result, history = session5.launchsession5(useServer, useBlock4, hyper_parameters)
-
-
+        
+        result, history = session5.launchsession5(useServer, useBlock4, hyper_parameters.get('batch_size'), hyper_parameters.get('samples_per_epoch'), hyper_parameters.get('nb_epoch'), optimizerObject)
 
 
 
