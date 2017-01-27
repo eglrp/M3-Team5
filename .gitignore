@@ -92,3 +92,5 @@ ENV/
 **/codebook.dat
 Code/Other files/
 **/*.png
+**/*.eps
+**/Databases/MIT/*
