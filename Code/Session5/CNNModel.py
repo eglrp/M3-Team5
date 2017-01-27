@@ -45,8 +45,8 @@ def compileModel(model,optim):
     return model
 
 
-def trainModel(model, train_generator, hyper_parameters, validation_generator):
-    history=model.fit_generator(train_generator, samples_per_epoch=hyper_parameters.get('samples_per_epoch') ,nb_epoch=hyper_parameters.get('nb_epoch'),validation_data=validation_generator,nb_val_samples=800)
+def trainModel(model, train_generator, samples_per_epoch, nb_epoch, validation_generator):
+    history=model.fit_generator(train_generator, samples_per_epoch=samples_per_epoch,nb_epoch=nb_epoch,validation_data=validation_generator,nb_val_samples=800)
     
     return model, history
 
