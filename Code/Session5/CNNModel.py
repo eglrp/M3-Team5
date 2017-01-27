@@ -54,12 +54,14 @@ def plotModelPerformance(history):
     plt.title('Accuracy')
     plt.plot(history.history['acc'], label='train')
     plt.plot(history.history['val_acc'], label='val')
+    plt.legend(loc=3)
     plt.savefig('accHistory.eps', format='eps', dpi=1000)
     
     plt.figure(2)
     plt.title('Loss')
     plt.plot(history.history['loss'], label='train')
     plt.plot(history.history['val_loss'], label='val')
+    plt.legend(loc=3)
     plt.savefig('lossHistory.eps', format='eps', dpi=1000)
 
 def evaluateModel(model, test_generator):
