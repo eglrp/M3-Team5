@@ -18,5 +18,5 @@ if __name__ == '__main__':
     
     for bs in batch_sizes:
         for epoch in nb_epoch:
-            print 'For batch size '+ bs+' , epoch ' + epoch
+            print 'For batch size '+ str(bs)+' , epoch ' + str(epoch)
             result = session5.launchsession5(useServer, useBlock4, bs, samples_per_epoch, nb_epoch)

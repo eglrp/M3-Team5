@@ -9,7 +9,8 @@ def launchsession5(useServer, useBlock4, batch_size, samples_per_epoch, nb_epoch
     #Get data
     dataUtils.createDataPaths(useServer,0.7)
     datagen = CNNData.getDataGenerator()
-    train_generator, validation_generator, test_generator = CNNData.getData(datagen, batch_size)
+    augmented_datagen = CNNData.getAugmentedDataGenerator()
+    train_generator, validation_generator, test_generator = CNNData.getData(datagen, augmented_datagen, batch_size)
     
     #Create model
     if useBlock4:
