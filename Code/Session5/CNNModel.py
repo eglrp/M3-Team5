@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 
 from keras.applications.vgg16 import VGG16
 from keras.models import Model
-from keras.layers import Dense, Flatten
+from keras.layers import Dense, Dropout, Flatten
 
 def getBaseModel():
     base_model = VGG16(weights='imagenet')
@@ -40,12 +40,13 @@ def createModelBlock4():
     
     return model
 
-def compileModel(model,optim='adadelta'):
+def compileModel(model,optim):
     model.compile(loss='categorical_crossentropy', optimizer=optim, metrics=['accuracy'])
     return model
 
-def trainModel(model, train_generator, batch_size, samples_per_epoch, nb_epoch, validation_generator):
-    history=model.fit_generator(train_generator, samples_per_epoch=samples_per_epoch ,nb_epoch=nb_epoch,validation_data=validation_generator,nb_val_samples=800)
+
+def trainModel(model, train_generator, hyper_parameters, validation_generator):
+    history=model.fit_generator(train_generator, samples_per_epoch=hyper_parameters.get('samples_per_epoch') ,nb_epoch=hyper_parameters.get('nb_epoch'),validation_data=validation_generator,nb_val_samples=800)
     
     return model, history
 

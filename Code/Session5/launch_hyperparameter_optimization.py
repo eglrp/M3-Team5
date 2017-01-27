@@ -65,7 +65,7 @@ if __name__ == '__main__':
             hyper_parameters['epsilon_value'] = (epsilon_range_adagrad[1] - epsilon_range_adagrad[0]) * random.random_sample() + epsilon_range_adagrad[0]
             hyper_parameters['rho_value'] = (rho_range[1] - rho_range[0]) * random.random_sample() + rho_range[0]
         
-        else:   
+        elif optimizer == 'adadelta':   
             hyper_parameters['epsilon_value'] = (epsilon_range_adadelta[1] - epsilon_range_adadelta[0]) * random.random_sample() + epsilon_range_adadelta[0]
         
         result, history = session5.launchsession5(useServer, useBlock4, hyper_parameters)
