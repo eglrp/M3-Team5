@@ -27,12 +27,12 @@ def launchsession5(useServer, useBlock4, batch_size, samples_per_epoch, nb_epoch
     
     print result
     
-    return result
+    return result, history
 
 
 if __name__ == '__main__':
     
-    useServer = True
+    useServer = False
     
     batch_size = 10
     nb_epoch = 20
