@@ -24,11 +24,13 @@ def launchsession5(useServer, useBlock4, batch_size, samples_per_epoch, nb_epoch
     
     #Evaluate the model
     CNNModel.plotModelPerformance(history)
-    result = CNNModel.evaluateModel(model, test_generator)
+    val_result = CNNModel.evaluateModel(model, validation_generator)
+    test_result = CNNModel.evaluateModel(model, test_generator)
     
-    print result
+    print 'Validation result ' + str(val_result)
+    print 'Test result ' + str(test_result)
     
-    return result
+    return val_result
 
 
 if __name__ == '__main__':
