@@ -1,9 +1,11 @@
 #!/bin/env python
 import sys
 sys.path.append('.')
-
+import os
 import session5,CNNOptimizers
 from numpy import random
+import cPickle
+import datetime
 
 if __name__ == '__main__':
     
@@ -11,7 +13,7 @@ if __name__ == '__main__':
     useBlock4 = False
     samples_per_epoch = 400
     
-    nb_random_trials = 200
+    nb_random_trials = 4
     
     #Paremeters to optimize
     batch_sizes = [10, 20, 30, 40, 50, 60, 70, 80, 100]
@@ -33,8 +35,14 @@ if __name__ == '__main__':
     epsilon_range_adadelta = [0, 1]
     rho_range = [0, 1]
     
-
-#    , bs, samples_per_epoch, nb_epoch
+    Results_random_search = [None] * nb_random_trials
+    Hyper_parameters_random_search = [None] * nb_random_trials
+    if not os.path.exists('./Results/Params'):
+        os.makedirs('./Results/Params')
+    if not os.path.exists('./Results/Results'):
+        os.makedirs('./Results/Results')   
+    if not os.path.exists('./Results/History'):
+        os.makedirs('./Results/History')    
     for i in range(nb_random_trials):
         hyper_parameters = {}
         
@@ -70,13 +78,40 @@ if __name__ == '__main__':
             
             optimizerObject=CNNOptimizers.getOptimizer(optimizer,hyper_parameters.get('learning_rate'), epsilon_value=hyper_parameters.get('epsilon_value'))
         
-        
-        result, history = session5.launchsession5(useServer, useBlock4, hyper_parameters.get('batch_size'),
+        print hyper_parameters
+        test_result, val_result, time_expend, history = session5.launchsession5(
+            useServer, useBlock4, hyper_parameters.get('batch_size'),
             hyper_parameters.get('samples_per_epoch'),hyper_parameters.get('nb_epoch'),
-            optimizerObject, dropout_fraction=hyper_parameters.get('dropout_value'),
-            batch_normalization=hyper_parameters.get('batch_normalization'))
+            optimizerObject, dropout_fraction = hyper_parameters.get('dropout_value'),
+            batch_normalization = hyper_parameters.get('batch_normalization'))
+        
+        results = {}
+        results['test_result'] = test_result
+        results['val_result'] = val_result
+        results['time_expend'] = time_expend
+        #Save results       
+        Results_random_search[i]  = results
+        Hyper_parameters_random_search[i] = hyper_parameters
+        #Save history to file                             
+        current_time = datetime.datetime.now().strftime("%d,%Y,%I%M%p") 
+        f = open("./Results/History/history" + current_time + ".dat", "wb")
+        cPickle.dump(history, f)
+        f.close()
+
+    #Save results and parameters to files
+    current_time = datetime.datetime.now().strftime("%d,%Y,%I%M%p")                
+    f = open("./Results/Params/Hyper_parameters_random_search" + current_time + ".dat", "wb")
+    cPickle.dump(Hyper_parameters_random_search, f)
+    f.close()   
+    g = open("./Results/Results/Results_random_search" + current_time + ".dat", "wb")
+    cPickle.dump(Results_random_search, g)
+    g.close()                            
 
 
+#current_time = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
+#
+#'10:36AM on July 23, 2010'
+#datetime.datetime.second
 
 #-Per model
 #batch_size = [10, 20, 40, 60, 80, 100]

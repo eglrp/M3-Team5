@@ -4,9 +4,11 @@ import sys
 sys.path.append('.')
 
 import CNNData, CNNModel, dataUtils, CNNOptimizers
+import time
 
 def launchsession5(useServer, useBlock4, batch_size, samples_per_epoch, nb_epoch, optimizer, dropout_fraction=0.0, batch_normalization=False):
     
+    start = time.time()
     #Get data
     dataUtils.createDataPaths(useServer,0.7)
     datagen = CNNData.getDataGenerator()
@@ -31,7 +33,12 @@ def launchsession5(useServer, useBlock4, batch_size, samples_per_epoch, nb_epoch
     print 'Validation result ' + str(val_result)
     print 'Test result ' + str(test_result)
     
-    return val_result, history
+    end = time.time()
+    time_expend = end - start
+    print 'Done in ' + str(time_expend) + ' secs.'
+    
+    
+    return test_result, val_result, time_expend, history
 
 
 if __name__ == '__main__':
