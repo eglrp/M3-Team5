@@ -35,8 +35,8 @@ if __name__ == '__main__':
     epsilon_range_adadelta = [0, 0.01]
     rho_range = [0.7, 1]
     
-    Results_random_search = [None] * nb_random_trials
-    Hyper_parameters_random_search = [None] * nb_random_trials
+#    Results_random_search = [None] * nb_random_trials
+#    Hyper_parameters_random_search = [None] * nb_random_trials
     if not os.path.exists('./Results/Params'):
         os.makedirs('./Results/Params')
     if not os.path.exists('./Results/Results'):
@@ -91,23 +91,19 @@ if __name__ == '__main__':
         results['test_result'] = test_result
         results['val_result'] = val_result
         results['time_expend'] = time_expend
-        #Save results       
-        Results_random_search[i]  = results
-        Hyper_parameters_random_search[i] = hyper_parameters
-#        #Save history to file                             
-#        current_time = datetime.datetime.now().strftime("%d,%Y,%I%M%p") 
-#        f = open("./Results/History/history" + current_time + ".dat", "wb")
-#        cPickle.dump(history, f)
-#        f.close()
+        #Save results and parameters to files       
+#        Results_random_search[i]  = results
+#        Hyper_parameters_random_search[i] = hyper_parameters
+        current_time = datetime.datetime.now().strftime("%d,%Y,%I%M%p")                
+        f = open("./Results/Params/Hyper_parameters_random_search" + current_time + ".dat", "wb")
+        cPickle.dump(hyper_parameters, f)
+        f.close()   
+        g = open("./Results/Results/Results_random_search" + current_time + ".dat", "wb")
+        cPickle.dump(results, g)
+        g.close()
 
-    #Save results and parameters to files
-    current_time = datetime.datetime.now().strftime("%d,%Y,%I%M%p")                
-    f = open("./Results/Params/Hyper_parameters_random_search" + current_time + ".dat", "wb")
-    cPickle.dump(Hyper_parameters_random_search, f)
-    f.close()   
-    g = open("./Results/Results/Results_random_search" + current_time + ".dat", "wb")
-    cPickle.dump(Results_random_search, g)
-    g.close()                            
+    
+                                
 
 
 #current_time = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
