@@ -13,7 +13,7 @@ if __name__ == '__main__':
     useBlock4 = False
     samples_per_epoch = 400
     
-    nb_random_trials = 10
+    nb_random_trials = 1
     
     #Paremeters to optimize
     batch_sizes = [10, 20, 30, 40, 50, 60, 70, 80, 100]
@@ -85,7 +85,7 @@ if __name__ == '__main__':
             useServer, useBlock4, hyper_parameters.get('batch_size'),
             samples_per_epoch,hyper_parameters.get('nb_epoch'),
             optimizerObject, dropout_fraction = hyper_parameters.get('dropout_value'),
-            batch_normalization = hyper_parameters.get('batch_normalization'))
+            batch_normalization = hyper_parameters.get('batch_normalization'), random_search = True)
         
         results = {}
         results['test_result'] = test_result

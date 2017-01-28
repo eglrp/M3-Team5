@@ -6,7 +6,7 @@ sys.path.append('.')
 import CNNData, CNNModel, dataUtils, CNNOptimizers
 import time
 
-def launchsession5(useServer, useBlock4, batch_size, samples_per_epoch, nb_epoch, optimizer, dropout_fraction=0.0, batch_normalization=False):
+def launchsession5(useServer, useBlock4, batch_size, samples_per_epoch, nb_epoch, optimizer, dropout_fraction=0.0, batch_normalization=False, random_search = False):
     
     start = time.time()
     #Get data
@@ -26,7 +26,10 @@ def launchsession5(useServer, useBlock4, batch_size, samples_per_epoch, nb_epoch
     model, history = CNNModel.trainModel(model, train_generator, samples_per_epoch, nb_epoch, validation_generator)
     
     #Evaluate the model
-    CNNModel.plotModelPerformance(history)
+    if random_search:
+        CNNModel.plotModelPerformanceRandom(history)
+    else:    
+        CNNModel.plotModelPerformance(history)
     val_result = CNNModel.evaluateModel(model, validation_generator)
     test_result = CNNModel.evaluateModel(model, test_generator)
     

@@ -4,6 +4,7 @@ from keras.applications.vgg16 import VGG16
 from keras.models import Model
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers.normalization import BatchNormalization
+import datetime
 
 def getBaseModel():
     base_model = VGG16(weights='imagenet')
@@ -78,6 +79,21 @@ def plotModelPerformance(history):
     plt.legend(loc=3)
     plt.savefig('lossHistory.eps', format='eps', dpi=1000)
 
+def plotModelPerformanceRandom(history):
+    current_time = datetime.datetime.now().strftime("%d,%Y,%I%M%p")
+    plt.figure(1)
+    plt.title('Accuracy')
+    plt.plot(history.history['acc'], label='train')
+    plt.plot(history.history['val_acc'], label='val')
+    plt.legend(loc=3)
+    plt.savefig('./Results/History/accHistory'+ current_time +'.eps', format='eps', dpi=1000)
+
+    plt.figure(2)
+    plt.title('Loss')
+    plt.plot(history.history['loss'], label='train')
+    plt.plot(history.history['val_loss'], label='val')
+    plt.legend(loc=3)
+    plt.savefig('./Results/History/lossHistory'+ current_time +'.eps', format='eps', dpi=1000)
 def evaluateModel(model, test_generator):
     result = model.evaluate_generator(test_generator, val_samples=800)
     
