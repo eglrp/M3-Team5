@@ -13,7 +13,7 @@ if __name__ == '__main__':
     useBlock4 = False
     samples_per_epoch = 400
     
-    nb_random_trials = 4
+    nb_random_trials = 10
     
     #Paremeters to optimize
     batch_sizes = [10, 20, 30, 40, 50, 60, 70, 80, 100]
@@ -25,15 +25,15 @@ if __name__ == '__main__':
     learning_rate_range = [0, 1]
     #Parameters for sgd
     momentum_range = [0, 1]
-    decay_range = [0, 1]
+    decay_range = [0, 0.1]
     nesterov = [True, False]
     
     #Parameters for adagrad
-    epsilon_range_adagrad = [0, 1]
+    epsilon_range_adagrad = [0, 0.01]
     
     #Parameters fro adadelta
-    epsilon_range_adadelta = [0, 1]
-    rho_range = [0, 1]
+    epsilon_range_adadelta = [0, 0.01]
+    rho_range = [0.7, 1]
     
     Results_random_search = [None] * nb_random_trials
     Hyper_parameters_random_search = [None] * nb_random_trials
@@ -50,8 +50,10 @@ if __name__ == '__main__':
         hyper_parameters['nb_epoch'] = random.choice(nb_epochs)
         
         hyper_parameters['dropout'] = random.choice(dropout)
-        hyper_parameters['dropout_value'] = (dropout_range[1] - dropout_range[0]) * random.random_sample() + dropout_range[0]
-        
+        if hyper_parameters['dropout']:
+            hyper_parameters['dropout_value'] = (dropout_range[1] - dropout_range[0]) * random.random_sample() + dropout_range[0]
+        else:
+            hyper_parameters['dropout_value'] = 0.0
         hyper_parameters['batch_norm'] = random.choice(batch_normalization)
         hyper_parameters['learning_rate'] = (learning_rate_range[1] - learning_rate_range[0]) * random.random_sample() + learning_rate_range[0]
         
@@ -81,7 +83,7 @@ if __name__ == '__main__':
         print hyper_parameters
         test_result, val_result, time_expend, history = session5.launchsession5(
             useServer, useBlock4, hyper_parameters.get('batch_size'),
-            hyper_parameters.get('samples_per_epoch'),hyper_parameters.get('nb_epoch'),
+            samples_per_epoch,hyper_parameters.get('nb_epoch'),
             optimizerObject, dropout_fraction = hyper_parameters.get('dropout_value'),
             batch_normalization = hyper_parameters.get('batch_normalization'))
         
@@ -92,11 +94,11 @@ if __name__ == '__main__':
         #Save results       
         Results_random_search[i]  = results
         Hyper_parameters_random_search[i] = hyper_parameters
-        #Save history to file                             
-        current_time = datetime.datetime.now().strftime("%d,%Y,%I%M%p") 
-        f = open("./Results/History/history" + current_time + ".dat", "wb")
-        cPickle.dump(history, f)
-        f.close()
+#        #Save history to file                             
+#        current_time = datetime.datetime.now().strftime("%d,%Y,%I%M%p") 
+#        f = open("./Results/History/history" + current_time + ".dat", "wb")
+#        cPickle.dump(history, f)
+#        f.close()
 
     #Save results and parameters to files
     current_time = datetime.datetime.now().strftime("%d,%Y,%I%M%p")                
