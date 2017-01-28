@@ -5,7 +5,7 @@ sys.path.append('.')
 
 import CNNData, CNNModel, dataUtils, CNNOptimizers
 
-def launchsession5(useServer, useBlock4, batch_size, samples_per_epoch, nb_epoch, optimizer):
+def launchsession5(useServer, useBlock4, batch_size, samples_per_epoch, nb_epoch, optimizer, dropout_fraction=0.0, batch_normalization=False):
     
     #Get data
     dataUtils.createDataPaths(useServer,0.7)
@@ -17,7 +17,7 @@ def launchsession5(useServer, useBlock4, batch_size, samples_per_epoch, nb_epoch
     if useBlock4:
         model = CNNModel.createModelBlock4()
     else:
-        model = CNNModel.createModel(hyper_parameters)
+        model = CNNModel.createModel(dropout_fraction=dropout_fraction,batch_normalization=batch_normalization)
     
     #Train the model
     model = CNNModel.compileModel(model, optimizer)
@@ -34,10 +34,9 @@ def launchsession5(useServer, useBlock4, batch_size, samples_per_epoch, nb_epoch
     return val_result, history
 
 
-
 if __name__ == '__main__':
     
-    useServer = False
+    useServer = True
     
     batch_size = 10
     nb_epoch = 20
@@ -47,6 +46,5 @@ if __name__ == '__main__':
     learning_rate=0.01
     
     optimizer=CNNOptimizers.getOptimizer('adagrad',learning_rate,rho_value=0.95,decay_value=0.0,epsilon_value=1e-08,momentum_value=0.0,nesterov_momentum=False)
-
     
     launchsession5(useServer, useBlock4, batch_size, samples_per_epoch, nb_epoch, optimizer)

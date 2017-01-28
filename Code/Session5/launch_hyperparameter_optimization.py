@@ -33,10 +33,6 @@ if __name__ == '__main__':
     epsilon_range_adadelta = [0, 1]
     rho_range = [0, 1]
     
-    
-    
-    #TODO:
-    #This should be random search
 
 #    , bs, samples_per_epoch, nb_epoch
     for i in range(nb_random_trials):
@@ -75,9 +71,10 @@ if __name__ == '__main__':
             optimizerObject=CNNOptimizers.getOptimizer(optimizer,hyper_parameters.get('learning_rate'), epsilon_value=hyper_parameters.get('epsilon_value'))
         
         
-        result, history = session5.launchsession5(useServer, useBlock4, hyper_parameters.get('batch_size'), hyper_parameters.get('samples_per_epoch'), hyper_parameters.get('nb_epoch'), optimizerObject)
-
-
+        result, history = session5.launchsession5(useServer, useBlock4, hyper_parameters.get('batch_size'),
+            hyper_parameters.get('samples_per_epoch'),hyper_parameters.get('nb_epoch'),
+            optimizerObject, dropout_fraction=hyper_parameters.get('dropout_value'),
+            batch_normalization=hyper_parameters.get('batch_normalization'))
 
 
 

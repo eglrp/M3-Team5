@@ -15,17 +15,18 @@ def getBaseModel():
     return base_model
 
 #Option 1: Change 1000 softmax by a 8 softmax
-def createModel(hyper_parameters):
+def createModel(dropout_fraction=0.0,batch_normalization=False):
     base_model = getBaseModel()
     
     #Get last but one layer output and add a new layer of 8 predictions
     x = base_model.layers[-2].output
-                         
-    # Add Dropout layer
-    if hyper_parameters.get('dropout') == True:
-        x = Dropout(hyper_parameters.get('dropout_value'))(x)
-    # Add Batch normalization layer
-    if hyper_parameters.get('batch_normalization') == True:
+    
+    if dropout_fraction > 0.0:
+        # Add Dropout layer
+        x = Dropout(dropout_fraction)(x)
+    
+    if batch_normalization:
+        # Add Batch normalization layer
         x = BatchNormalization(epsilon=0.001, mode=0, axis=-1,
             momentum=0.99, weights=None, beta_init='zero',
             gamma_init='one', gamma_regularizer=None,
