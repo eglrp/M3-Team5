@@ -80,6 +80,7 @@ def plotModelPerformance(history):
     plt.savefig('lossHistory.eps', format='eps', dpi=1000)
 
 def plotModelPerformanceRandom(history):
+    plt.switch_backend('PS')
     current_time = datetime.datetime.now().strftime("%d,%Y,%I%M%p")
     plt.figure(1)
     plt.title('Accuracy')
