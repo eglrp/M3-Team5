@@ -10,7 +10,7 @@ def getDataGenerator():
     return datagen
 
 def getAugmentedDataGenerator():
-    datagen = ImageDataGenerator(featurewise_center=False,samplewise_center=False,featurewise_std_normalization=False,samplewise_std_normalization=False,preprocessing_function=preprocess_input, rotation_range=0.,width_shift_range=0.,height_shift_range=0.,shear_range=0.,zoom_range=0.,fill_mode='nearest',horizontal_flip=False,vertical_flip=False,rescale=None)
+    datagen = ImageDataGenerator(featurewise_center=False,samplewise_center=False,featurewise_std_normalization=False,samplewise_std_normalization=False,preprocessing_function=preprocess_input, rotation_range=0.,width_shift_range=0.,height_shift_range=0.,shear_range=0.,zoom_range=0.,fill_mode='nearest',horizontal_flip=True,vertical_flip=False,rescale=None,zca_whitening=True)
     
     #TODO: Data augmentation
     
