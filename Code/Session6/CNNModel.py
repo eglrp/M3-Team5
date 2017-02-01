@@ -40,7 +40,10 @@ def createModel(dropout_fraction = 0.0, batch_normalization = False):
             beta_regularizer=None)(x)
         
         
-    keras.layers.pooling.MaxPooling2D(pool_size=(2, 2), strides=None, border_mode='valid', dim_ordering='default')    
+    x = MaxPooling2D(pool_size=(2, 2), 
+                     strides=None, 
+                     border_mode='valid', 
+                     dim_ordering='default')(x)  
     #Flatten the results to put inside a dense layer    
     x = Flatten(name = 'flatten')(x)
     #Dense layer to make the classification

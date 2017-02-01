@@ -16,7 +16,7 @@ def launchsession5(useServer, batch_size, samples_per_epoch, nb_epoch, optimizer
     train_generator, validation_generator, test_generator = CNNData.getData(datagen, augmented_datagen, batch_size)
     
     #Create model
-    model = CNNModel.createModel(dropout_fraction=dropout_fraction, batch_normalization=batch_normalization)
+    model = CNNModel.createModel(dropout_fraction = dropout_fraction, batch_normalization = batch_normalization)
     
     #Train the model
     model = CNNModel.compileModel(model, optimizer)
@@ -50,8 +50,12 @@ if __name__ == '__main__':
     samples_per_epoch = 400
     useBlock4 = False
     
-    learning_rate=0.01
+    learning_rate = 0.01
     
-    optimizer=CNNOptimizers.getOptimizer('adagrad',learning_rate,rho_value=0.95,decay_value=0.0,epsilon_value=1e-08,momentum_value=0.0,nesterov_momentum=False)
+    optimizer = CNNOptimizers.getOptimizer('adagrad', learning_rate, 
+                                           rho_value = 0.95, decay_value=0.0,
+                                           epsilon_value = 1e-08,
+                                           momentum_value = 0.0,
+                                           nesterov_momentum = False)
     
     launchsession5(useServer, useBlock4, batch_size, samples_per_epoch, nb_epoch, optimizer)
