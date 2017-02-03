@@ -6,20 +6,22 @@ sys.path.append('.')
 import CNNData, CNNModel, dataUtils, CNNOptimizers
 import time
 
-def launchsession5(useServer, batch_size, samples_per_epoch, nb_epoch, optimizer, dropout_fraction=0.0, batch_normalization=False, random_search = False):
+def launchsession6(useServer, batch_size, samples_per_epoch, nb_epoch, optimizer_type, dropout_fraction=0.0, batch_normalization=False, random_search = False):
     
     start = time.time()
     #Get data
     dataUtils.createDataPaths(useServer, 0.7)
     datagen = CNNData.getDataGenerator()
-    augmented_datagen = CNNData.getAugmentedDataGenerator()
-    train_generator, validation_generator, test_generator = CNNData.getData(datagen, augmented_datagen, batch_size)
+    train_generator, validation_generator, test_generator = CNNData.getData(datagen, batch_size)
     
     #Create model
     model = CNNModel.createModel(dropout_fraction = dropout_fraction, batch_normalization = batch_normalization)
     
     #Train the model
-    model = CNNModel.compileModel(model, optimizer)
+    
+    model = CNNModel.compileModel(model, optimizer_type)
+#    model.summary()
+    
     model, history = CNNModel.trainModel(model, train_generator, samples_per_epoch, nb_epoch, validation_generator)
     
     #Evaluate the model
@@ -47,15 +49,15 @@ if __name__ == '__main__':
     
     batch_size = 10
     nb_epoch = 20
-    samples_per_epoch = 400
-    useBlock4 = False
+    samples_per_epoch = 1184
+    dropout_fraction = 0.3
     
     learning_rate = 0.01
     
-    optimizer = CNNOptimizers.getOptimizer('adagrad', learning_rate, 
-                                           rho_value = 0.95, decay_value=0.0,
+    optimizer_type = CNNOptimizers.getOptimizer('adadelta', learning_rate, 
+                                           rho_value = 0.95, decay_value = 0.0,
                                            epsilon_value = 1e-08,
                                            momentum_value = 0.0,
                                            nesterov_momentum = False)
     
-    launchsession5(useServer, useBlock4, batch_size, samples_per_epoch, nb_epoch, optimizer)
+    launchsession6(useServer, batch_size, samples_per_epoch, nb_epoch, optimizer_type, dropout_fraction)
