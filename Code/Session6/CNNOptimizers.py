@@ -1,4 +1,4 @@
-from keras.optimizers import SGD, Adagrad, Adadelta
+from keras.optimizers import SGD, Adagrad, Adadelta, Adam
 
 def getOptimizer(optimizerChoice, learning_rate, rho_value = 0.95, decay_value = 0.0, epsilon_value = 1e-08, momentum_value = 0.0, nesterov_momentum = False):
     if optimizerChoice == 'sgd':
@@ -7,5 +7,7 @@ def getOptimizer(optimizerChoice, learning_rate, rho_value = 0.95, decay_value =
         optimizer = Adagrad(lr = learning_rate, epsilon = epsilon_value, decay = decay_value)
     elif optimizerChoice == 'adadelta': 
         optimizer = Adadelta(lr = learning_rate, rho = rho_value, epsilon = epsilon_value, decay = decay_value)
+    elif optimizerChoice == 'adam': 
+        optimizer = Adam(lr = learning_rate, epsilon = epsilon_value, decay = decay_value)
 
     return optimizer

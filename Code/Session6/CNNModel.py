@@ -5,6 +5,7 @@ from keras.layers import Dense, Dropout, Flatten, Input, Activation
 from keras.layers.convolutional import Convolution2D
 from keras.layers.normalization import BatchNormalization
 from keras.layers.pooling import MaxPooling2D
+from keras.regularizers import l2, activity_l1, l1l2, l1
 import datetime
 
  
@@ -12,23 +13,21 @@ def createModel(dropout_fraction = 0.0, batch_normalization = False):
     
     input = Input(shape = (3, 256, 256))
     
-    x = Convolution2D(32, 5, 5, activation = 'relu', border_mode = 'same', name = 'conv1')(input)
+    x = Convolution2D(32, 5, 5, activation = 'relu', W_regularizer=l2(0.01), border_mode = 'same', name = 'conv1')(input)
     
-    x = Dropout(dropout_fraction)(x)
+    #x = Dropout(dropout_fraction)(x)
     
-    x = MaxPooling2D((2, 2), strides = (2, 2), name = 'pool1')(x)
+    x = MaxPooling2D((4, 4), strides = (4, 4), name = 'pool1')(x)
 
     x = BatchNormalization()(x)
 
-    x = Convolution2D(64, 5, 5, activation = 'relu', border_mode = 'same', name = 'conv2')(x)
+    x = Convolution2D(32, 5, 5, activation = 'relu', W_regularizer=l2(0.01), border_mode = 'same', name = 'conv2')(x)
     
-    x = Dropout(dropout_fraction)(x)
+    #x = Dropout(dropout_fraction)(x)
     
-    x = MaxPooling2D((2, 2), strides = (2, 2), name = 'pool2')(x)
+    x = MaxPooling2D((4, 4), strides = (4, 4), name = 'pool2')(x)
 
     x = BatchNormalization()(x)
-    
-#    x = Convolution2D(128, 3, 3, activation = 'relu', border_mode = 'same', name = 'conv3')(x)
     
     x = MaxPooling2D((2, 2), strides = (2, 2), name = 'pool3')(x)
 
@@ -36,11 +35,11 @@ def createModel(dropout_fraction = 0.0, batch_normalization = False):
 
     x = Flatten(name = 'flatten')(x)
     
-    x = Dropout(dropout_fraction)(x)
+   #x = Dropout(dropout_fraction)(x)
+
+    x = Dense(512, activation = 'relu', name = 'fc1')(x)
     
-    x = Dense(4096, activation = 'relu', name = 'fc1')(x)
-    
-    x = Dropout(dropout_fraction)(x)
+   #x = Dropout(dropout_fraction)(x)
     
     x = Dense(8, activation = 'softmax', name = 'predictions')(x)
 

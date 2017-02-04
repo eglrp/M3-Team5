@@ -12,16 +12,15 @@ def launchsession6(useServer, batch_size, samples_per_epoch, nb_epoch, optimizer
     #Get data
     dataUtils.createDataPaths(useServer, 0.7)
     datagen = CNNData.getDataGenerator()
-    train_generator, validation_generator, test_generator = CNNData.getData(datagen, batch_size)
+    augmented_datagen = CNNData.getAugmentedDataGenerator()
+    train_generator, validation_generator, test_generator = CNNData.getDataOld(datagen, augmented_datagen, batch_size)
     
     #Create model
     model = CNNModel.createModel(dropout_fraction = dropout_fraction, batch_normalization = batch_normalization)
     
     #Train the model
-    
     model = CNNModel.compileModel(model, optimizer_type)
-#    model.summary()
-    
+    model.summary()
     model, history = CNNModel.trainModel(model, train_generator, samples_per_epoch, nb_epoch, validation_generator)
     
     #Evaluate the model
@@ -47,12 +46,12 @@ if __name__ == '__main__':
     
     useServer = True
     
-    batch_size = 10
-    nb_epoch = 20
-    samples_per_epoch = 1184
-    dropout_fraction = 0.3
+    batch_size = 32
+    nb_epoch = 15
+    samples_per_epoch = 1000
+    dropout_fraction = 0.0
     
-    learning_rate = 0.01
+    learning_rate = 1
     
     optimizer_type = CNNOptimizers.getOptimizer('adadelta', learning_rate, 
                                            rho_value = 0.95, decay_value = 0.0,
