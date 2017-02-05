@@ -16,7 +16,10 @@ def launchsession6(useServer, batch_size, samples_per_epoch, nb_epoch, optimizer
     train_generator, validation_generator, test_generator = CNNData.getDataOld(datagen, augmented_datagen, batch_size)
     
     #Create model
-    model = CNNModel.createModel(dropout_fraction = dropout_fraction, batch_normalization = batch_normalization)
+    if compact:
+      model = CNNModel.createModel(dropout_fraction = dropout_fraction, batch_normalization = batch_normalization)
+    else:
+      model = CNNModel.createModelNC(dropout_fraction = dropout_fraction, batch_normalization = batch_normalization)
     
     #Train the model
     model = CNNModel.compileModel(model, optimizer_type)
@@ -45,7 +48,7 @@ def launchsession6(useServer, batch_size, samples_per_epoch, nb_epoch, optimizer
 if __name__ == '__main__':
     
     useServer = True
-    
+    compact = False
     batch_size = 32
     nb_epoch = 15
     samples_per_epoch = 1000

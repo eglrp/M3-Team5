@@ -6,6 +6,7 @@ from keras.layers.convolutional import Convolution2D
 from keras.layers.normalization import BatchNormalization
 from keras.layers.pooling import MaxPooling2D
 from keras.regularizers import l2, activity_l1, l1l2, l1
+from keras.layers.noise import GaussianNoise
 import datetime
 
  
@@ -20,6 +21,8 @@ def createModel(dropout_fraction = 0.0, batch_normalization = False):
     x = MaxPooling2D((4, 4), strides = (4, 4), name = 'pool1')(x)
 
     x = BatchNormalization()(x)
+    
+    x = GaussianNoise(0.05)(x) #Roque
 
     x = Convolution2D(32, 5, 5, activation = 'relu', W_regularizer=l2(0.01), border_mode = 'same', name = 'conv2')(x)
     
@@ -29,7 +32,9 @@ def createModel(dropout_fraction = 0.0, batch_normalization = False):
 
     x = BatchNormalization()(x)
     
-    x = MaxPooling2D((2, 2), strides = (2, 2), name = 'pool3')(x)
+    x = GaussianNoise(0.05)(x) #Roque
+    
+    x = MaxPooling2D((4, 4), strides = (4, 4), name = 'pool3')(x) #Roque (Before (2,2))
 
     #Classification block
 
@@ -42,10 +47,68 @@ def createModel(dropout_fraction = 0.0, batch_normalization = False):
    #x = Dropout(dropout_fraction)(x)
     
     x = Dense(8, activation = 'softmax', name = 'predictions')(x)
+    
 
     model = Model(input = input, output = x)
     
     return model
+
+def createModelNC(dropout_fraction = 0.0, batch_normalization = False):  
+    
+    input = Input(shape = (3, 256, 256))
+    
+    x = Convolution2D(32, 5, 5, activation = 'relu', W_regularizer=l2(0.01), border_mode = 'same', name = 'conv1')(input)
+    
+    #x = Dropout(dropout_fraction)(x)
+    
+    x = MaxPooling2D((4, 4), strides = (4, 4), name = 'pool1')(x)
+
+    x = BatchNormalization()(x)
+    
+    x = GaussianNoise(0.05)(x)
+
+    x = Convolution2D(32, 5, 5, activation = 'relu', W_regularizer=l2(0.01), border_mode = 'same', name = 'conv2')(x)
+    
+    #x = Dropout(dropout_fraction)(x)
+    
+    x = MaxPooling2D((4, 4), strides = (4, 4), name = 'pool2')(x)
+
+    x = BatchNormalization()(x)
+    
+    x = GaussianNoise(0.05)(x)
+    
+    x = Convolution2D(32, 5, 5, activation = 'relu', W_regularizer=l2(0.01), border_mode = 'same', name = 'conv3')(x)
+    
+    x = MaxPooling2D((4, 4), strides = (4, 4), name = 'pool3')(x)
+    
+    x = BatchNormalization()(x)
+    
+    x = GaussianNoise(0.05)(x)
+    
+    x = MaxPooling2D((4, 4), strides = (4, 4), name = 'pool4')(x)
+    
+    x = BatchNormalization()(x)
+    
+    x = GaussianNoise(0.05)(x)
+
+    #Classification block
+
+    x = Flatten(name = 'flatten')(x)
+    
+   #x = Dropout(dropout_fraction)(x)
+
+    x = Dense(512, activation = 'relu', name = 'fc1')(x)
+    
+   #x = Dropout(dropout_fraction)(x)
+    
+    x = Dense(8, activation = 'softmax', name = 'predictions')(x)
+    
+
+    model = Model(input = input, output = x)
+    
+    return model  
+
+    
 
 def createModel02(dropout_fraction = 0.0, batch_normalization = False):
     
@@ -111,6 +174,7 @@ def createModel02(dropout_fraction = 0.0, batch_normalization = False):
     if dropout_fraction > 0.0:
         # Add Dropout layer
         x = Dropout(dropout_fraction)(x)
+        
     
     if batch_normalization:
         # Add Batch normalization layer
