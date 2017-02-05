@@ -57,18 +57,23 @@ def createModelNC(dropout_fraction = 0.0, batch_normalization = False):
     
     input = Input(shape = (3, 256, 256))
     
-    x = Convolution2D(32, 5, 5, activation = 'relu', W_regularizer=l2(0.01), border_mode = 'same', name = 'conv1')(input)
+    x = Convolution2D(32, 5, 5,  W_regularizer=l2(0.01), border_mode = 'same', name = 'conv1')(input)
     
-    #x = Dropout(dropout_fraction)(x)
+    x = BatchNormalization()(x)
     
+    x = Activation('relu')(x)
+        
     x = MaxPooling2D((4, 4), strides = (4, 4), name = 'pool1')(x)
 
     x = BatchNormalization()(x)
     
     x = GaussianNoise(0.05)(x)
 
-    x = Convolution2D(32, 5, 5, activation = 'relu', W_regularizer=l2(0.01), border_mode = 'same', name = 'conv2')(x)
+    x = Convolution2D(32, 5, 5, W_regularizer=l2(0.01), border_mode = 'same', name = 'conv2')(x)
     
+    x = BatchNormalization()(x)
+    
+    x = Activation('relu')(x)
     #x = Dropout(dropout_fraction)(x)
     
     x = MaxPooling2D((4, 4), strides = (4, 4), name = 'pool2')(x)
@@ -76,15 +81,19 @@ def createModelNC(dropout_fraction = 0.0, batch_normalization = False):
     x = BatchNormalization()(x)
     
     x = GaussianNoise(0.05)(x)
+        
+    x = Convolution2D(32, 5, 5, W_regularizer=l2(0.01), border_mode = 'same', name = 'conv3')(x)
     
-    x = Convolution2D(32, 5, 5, activation = 'relu', W_regularizer=l2(0.01), border_mode = 'same', name = 'conv3')(x)
+    x = BatchNormalization()(x)
     
+    x = Activation('relu')(x)
+        
     x = MaxPooling2D((4, 4), strides = (4, 4), name = 'pool3')(x)
     
     x = BatchNormalization()(x)
     
     x = GaussianNoise(0.05)(x)
-    
+        
     x = MaxPooling2D((4, 4), strides = (4, 4), name = 'pool4')(x)
     
     x = BatchNormalization()(x)
@@ -96,14 +105,15 @@ def createModelNC(dropout_fraction = 0.0, batch_normalization = False):
     x = Flatten(name = 'flatten')(x)
     
    #x = Dropout(dropout_fraction)(x)
-
+    #x = Dropout(0.2)(x)
+    
     x = Dense(256, activation = 'relu', name = 'fc1')(x)
     
-    x = Dropout(dropout_fraction)(x)
+    x = Dropout(0.2)(x)
     
     x = Dense(128, activation = 'relu', name = 'fc2')(x)
     
-    x = Dropout(dropout_fraction)(x)
+    x = Dropout(0.2)(x)
     
     x = Dense(8, activation = 'softmax', name = 'predictions')(x)
     
@@ -125,6 +135,7 @@ def trainModel(model, train_generator, samples_per_epoch, nb_epoch, validation_g
     return model, history
 
 def plotModelPerformance(history):
+    plt.switch_backend('PS')
     plt.figure(1)
     plt.title('Accuracy')
     plt.plot(history.history['acc'], label='train')

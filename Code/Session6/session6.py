@@ -54,7 +54,7 @@ if __name__ == '__main__':
     samples_per_epoch = 1024
     dropout_fraction = 0.1
     
-    learning_rate = 0.6
+    learning_rate = 0.75
     
     optimizer_type = CNNOptimizers.getOptimizer('adadelta', learning_rate, 
                                            rho_value = 0.95, decay_value = 0.0,
