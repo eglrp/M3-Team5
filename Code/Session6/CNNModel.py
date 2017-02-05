@@ -97,9 +97,13 @@ def createModelNC(dropout_fraction = 0.0, batch_normalization = False):
     
    #x = Dropout(dropout_fraction)(x)
 
-    x = Dense(512, activation = 'relu', name = 'fc1')(x)
+    x = Dense(256, activation = 'relu', name = 'fc1')(x)
     
-   #x = Dropout(dropout_fraction)(x)
+    x = Dropout(dropout_fraction)(x)
+    
+    x = Dense(128, activation = 'relu', name = 'fc2')(x)
+    
+    x = Dropout(dropout_fraction)(x)
     
     x = Dense(8, activation = 'softmax', name = 'predictions')(x)
     
@@ -109,104 +113,6 @@ def createModelNC(dropout_fraction = 0.0, batch_normalization = False):
     return model  
 
     
-
-def createModel02(dropout_fraction = 0.0, batch_normalization = False):
-    
-    img_input = Input(shape = (3, 256, 256))
-    x = img_input
-    #First convolutional layer
-    x = Convolution2D(32, 3, 3, 
-                  init = 'glorot_uniform', 
-                  activation = None, 
-                  border_mode = 'valid', #'valid', 'same' or 'full'. ('full' requires the Theano backend.)
-                  subsample = (1, 1), 
-                  dim_ordering = 'default', 
-                  W_regularizer = None, 
-                  b_regularizer = None, 
-                  activity_regularizer = None, 
-                  W_constraint = None, 
-                  b_constraint = None, 
-                  bias = True, name = 'conv01')(x)
-    x = Activation('relu')(x)
-    
-    x = MaxPooling2D(pool_size = (2, 2), 
-                     strides = (3, 3), 
-                     border_mode = 'valid', 
-                     dim_ordering = 'default',
-                     name = 'pool01')(x) 
-    
-    x = Convolution2D(64, 3, 3, 
-                  init = 'glorot_uniform', 
-                  activation = None, 
-                  border_mode = 'valid', #'valid', 'same' or 'full'. ('full' requires the Theano backend.)
-                  subsample = (1, 1), 
-                  dim_ordering = 'default', 
-                  W_regularizer = None, 
-                  b_regularizer = None, 
-                  activity_regularizer = None, 
-                  W_constraint = None, 
-                  b_constraint = None, 
-                  bias = True, name = 'conv02')(x)
-    x = Activation('relu')(x)
-    x = MaxPooling2D(pool_size = (2, 2), 
-                     strides = (3, 3), 
-                     border_mode = 'valid', 
-                     dim_ordering = 'default',
-                     name = 'pool02')(x) 
-    x = Convolution2D(128, 3, 3, 
-                  init = 'glorot_uniform', 
-                  activation = None, 
-                  border_mode = 'valid', #'valid', 'same' or 'full'. ('full' requires the Theano backend.)
-                  subsample = (1, 1), 
-                  dim_ordering = 'default', 
-                  W_regularizer = None, 
-                  b_regularizer = None, 
-                  activity_regularizer = None, 
-                  W_constraint = None, 
-                  b_constraint = None, 
-                  bias = True, name = 'conv03')(x)
-    x = Activation('relu')(x)
-    x = MaxPooling2D(pool_size = (2, 2), 
-                     strides = (3, 3), 
-                     border_mode = 'valid', 
-                     dim_ordering = 'default',
-                     name = 'pool03')(x)
-    if dropout_fraction > 0.0:
-        # Add Dropout layer
-        x = Dropout(dropout_fraction)(x)
-        
-    
-    if batch_normalization:
-        # Add Batch normalization layer
-        x = BatchNormalization(epsilon=0.001, mode=0, axis=-1,
-            momentum=0.99, weights=None, beta_init='zero',
-            gamma_init='one', gamma_regularizer=None,
-            beta_regularizer=None)(x)
-        
-        
-#    x = MaxPooling2D(pool_size = (2, 2), 
-#                     strides = None, 
-#                     border_mode = 'valid', 
-#                     dim_ordering = 'default')(x)  
-    #Flatten the results to put inside a dense layer    
-    x = Flatten(name = 'flatten')(x)
-    #Dense layer to make the classification
-    x = Dense(200, init = 'glorot_uniform', 
-              activation = None, 
-              weights = None,
-              W_regularizer = None, 
-              b_regularizer = None, 
-              activity_regularizer = None, 
-              W_constraint = None, 
-              b_constraint = None, 
-              bias = True, 
-              input_dim = None)(x)
-    x = Activation('relu')(x)
-    x = Dense(8, activation = 'softmax', name = 'predictions')(x)
-    model = Model(input = img_input, output = x)
-    print model.summary()
-    
-    return model
 
 def compileModel(model,optimizer):
     model.compile(optimizer = optimizer, loss = 'categorical_crossentropy', metrics = ['accuracy'])

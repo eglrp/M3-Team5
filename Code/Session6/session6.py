@@ -6,7 +6,7 @@ sys.path.append('.')
 import CNNData, CNNModel, dataUtils, CNNOptimizers
 import time
 
-def launchsession6(useServer, batch_size, samples_per_epoch, nb_epoch, optimizer_type, dropout_fraction=0.0, batch_normalization=False, random_search = False):
+def launchsession6(useServer, batch_size, samples_per_epoch, nb_epoch, optimizer_type, compact, dropout_fraction=0.0, batch_normalization=False, random_search = False):
     
     start = time.time()
     #Get data
@@ -50,11 +50,11 @@ if __name__ == '__main__':
     useServer = True
     compact = False
     batch_size = 32
-    nb_epoch = 15
-    samples_per_epoch = 1000
-    dropout_fraction = 0.0
+    nb_epoch = 20
+    samples_per_epoch = 1024
+    dropout_fraction = 0.1
     
-    learning_rate = 1
+    learning_rate = 0.6
     
     optimizer_type = CNNOptimizers.getOptimizer('adadelta', learning_rate, 
                                            rho_value = 0.95, decay_value = 0.0,
@@ -62,4 +62,4 @@ if __name__ == '__main__':
                                            momentum_value = 0.0,
                                            nesterov_momentum = False)
     
-    launchsession6(useServer, batch_size, samples_per_epoch, nb_epoch, optimizer_type, dropout_fraction)
+    launchsession6(useServer, batch_size, samples_per_epoch, nb_epoch, optimizer_type, compact, dropout_fraction)
